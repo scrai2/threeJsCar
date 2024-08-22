@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: vyom-frontend-ingress
+  namespace: vyom-dev # Ensure this matches the namespace where MinIO is deployed
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    cert-manager.io/cluster-issuer: "letsencrypt"
+spec:
+  tls:
+  - hosts:
+    - vyom.kubepipe.in
+    secretName: vyom-dev-tls
+  ingressClassName: nginx
+  rules:
+  - host: vyom.kubepipe.in
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: vyom-frontend-service  # Replace with the name of your MinIO service
+            port:
+              number: 3010  # Ensure this matches the port on which MinIO is exposed
+

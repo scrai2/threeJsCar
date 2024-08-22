@@ -1,0 +1,55 @@
+$web-font-path: "/src/assests/fonts" !default;
+
+  @font-face {
+    font-family: "Roboto";
+    src: url('#{$web-font-path}/Roboto-Bold.woff') format("woff");
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "Roboto";
+    src: url('#{$web-font-path}/Roboto-Medium.woff') format("woff");
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "Roboto";
+    src: url('#{$web-font-path}/Roboto-Regular.woff') format("woff");
+    font-display: swap;
+  }
+
+body{
+    font-family: "Roboto", Arial, Sans-Serif;
+}
+
+h1{
+    font-family: "Roboto", Arial, Sans-Serif;
+}
+
+h2{
+    font-family: "Roboto", Arial, Sans-Serif;
+}
+
+h3{
+    font-family: "Roboto", Arial, Sans-Serif;
+    @include font_size_color(18px);
+}
+
+.h1-b{
+  font:600 32px/120% "Roboto", Arial, Sans-Serif;
+  color: $black-100;
+}
+
+.h2-b{
+  font:600 24px/150% "Roboto", Arial, Sans-Serif;
+}
+.h3-b{
+  font:600 18px/150% "Roboto", Arial, Sans-Serif;
+}
+.body-b{
+  font:600 16px/150% "Roboto", Arial, Sans-Serif;
+}
+.label{
+  font:400 12px/150% "Roboto", Arial, Sans-Serif;
+}
+.caption{
+  font:400 10px/150%"Roboto", Arial, Sans-Serif;
+}

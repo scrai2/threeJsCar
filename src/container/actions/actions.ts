@@ -1,0 +1,159 @@
+import "../../scss/main.scss";
+import Icons from "../../assests/icons/icons.svg";
+import { $id, $query } from "../../utils/dom";
+import { globals } from '../../model-viewer/globals';
+
+
+export const loadActions = (container: string) => {
+  loadLightOnOffAction(container);
+  loadExteriorInteriorAction(container);
+  loadOpenCloseDoorAction(container);
+  loadRotateAction(container);
+};
+
+
+let doorOpen = true;
+
+export const loadOpenCloseDoorAction = (container: string) => {
+  const openCloseDoorContainer = $query(".action-container");
+  openCloseDoorContainer?.remove();
+  $id(container)?.insertAdjacentHTML("beforeend", renderOpenCloseDoorAction());
+
+  const doorButton = $query(".action-container-door-opened");
+  if (doorButton) {
+    doorButton.addEventListener("click", () => {
+      console.log("Open/Close door button clicked!");
+
+      if (globals.threeJSComponent) {
+        if (doorOpen) {
+          globals.threeJSComponent.playAnimation("All_Doors_Opening");
+        } else {
+          globals.threeJSComponent.playAnimation("All_doors_closing");
+        }
+        doorOpen = !doorOpen;
+      } else {
+        console.error("ThreeJSComponent instance is not initialized.");
+      }
+    });
+  }
+};
+
+
+export const loadRotateAction = (container: string) => {
+  const rotate360 = $query(".rotate-model");
+  rotate360?.remove();
+  $id(container)?.insertAdjacentHTML("beforeend", renderRotate());
+
+  const rotateButton = $query(".rotate-model-360");
+  if (rotateButton) {
+    rotateButton.addEventListener("click", () => {
+      console.log("Rotate 360 button clicked!");
+    });
+  }
+};
+
+export const loadExteriorInteriorAction = (container: string) => {
+  const exteriorInteriorContainer = $query(".exterior-interior-action");
+  exteriorInteriorContainer?.remove();
+  $id(container)?.insertAdjacentHTML(
+    "beforeend",
+    renderExteriorInteriorAction()
+  );
+
+  const exteriorButton = $query(".exterior-interior-action-container-ext");
+  const interiorButton = $query(".exterior-interior-action-container-int");
+
+  if (exteriorButton) {
+    exteriorButton.addEventListener("click", () => {
+      console.log("Exterior button clicked!");
+      if (globals.threeJSComponent) {
+        globals.threeJSComponent.setCameraPosition(globals.threeJSComponent.exteriorCameraPosition, globals.threeJSComponent.exteriorCameraTarget);
+      } else {
+        console.error("ThreeJSComponent instance is not initialized.");
+      }
+    });
+  }
+
+  if (interiorButton) {
+    interiorButton.addEventListener("click", () => {
+      console.log("Interior button clicked!");
+      if (globals.threeJSComponent) {
+        globals.threeJSComponent.setCameraPosition(globals.threeJSComponent.interiorCameraPosition, globals.threeJSComponent.interiorCameraTarget);
+      } else {
+        console.error("ThreeJSComponent instance is not initialized.");
+      }
+    });
+  }
+};
+
+
+export const loadLightOnOffAction = (container: string) => {
+  const lightOnOffContainer = $query(".light-container");
+  lightOnOffContainer?.remove();
+  const containerElement = $id(container);
+  if (containerElement) {
+    containerElement.insertAdjacentHTML("beforeend", renderLightOnOffAction());
+
+    const lightButton = $query(".light-container-lightOn");
+    if (lightButton) {
+      lightButton.addEventListener("click", () => {
+        console.log("Light On/Off button clicked!");
+      });
+    }
+  }
+};
+
+export const renderOpenCloseDoorAction = () => {
+  return `
+    <div class="action-container">
+        <div class="action-container-door-opened radius-50">
+            <svg class="action-container-door-opened-doorIcon">
+                <use xlink:href="${Icons}#carIcon"></use>
+            </svg>
+        </div>
+    </div>
+  `;
+};
+
+export const renderRotate = () => {
+  return `
+    <div class="rotate-model rotate-model-active">
+        <div class="rotate-model-360 radius-50">
+            <div class="360-button">360</div>
+        </div>
+    </div>
+  `;
+};
+
+export const renderExteriorInteriorAction = () => {
+  return `
+    <div class="exterior-interior-action">
+        <div class="exterior-interior-action-container radius-200">
+            <div class="exterior-interior-action-container-ext radius-200 exterior-interior-action-container-active">     
+                <svg class="exterior-interior-action-container-ext-extcarIcon">
+                    <use xlink:href="${Icons}#extIcon"></use>
+                </svg>
+            <p class="exterior-interior-action-container-ext-content exterior-interior-action-container-ext-activecontent">EXT</p>
+            </div>         
+            <div class="exterior-interior-action-container-int radius-200">
+                <svg class="exterior-interior-action-container-int-intseatIcon">
+                    <use xlink:href="${Icons}#intIcon"></use>
+                </svg>          
+            <p class="exterior-interior-action-container-int-content">INT</p>
+            </div>            
+        </div>        
+    </div>
+  `;
+};
+
+export const renderLightOnOffAction = () => {
+  return `
+    <div class="light-container">
+        <div class="light-container-lightOn radius-50">
+            <svg class="light-container-lightOn-bulbIcon">
+                <use xlink:href="${Icons}#lightIcon"></use>
+            </svg>
+        </div>
+    </div>
+  `;
+};

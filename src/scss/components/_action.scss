@@ -1,0 +1,19 @@
+.action-container {
+  &-active{
+    border:  1px solid #fff;
+  }
+  &-door-opened {
+    cursor: pointer;
+    position: absolute;
+    bottom: 26px;
+    left: 47px;
+    background-color: $grey-500;
+    @include width_height($height: 55px, $width: 55px);
+    @include flex(flex, null, center, center);
+    
+    &-doorIcon {
+      color: $white-base;
+      @include width_height($height: 27px, $width: 28px);
+    }
+  }
+}

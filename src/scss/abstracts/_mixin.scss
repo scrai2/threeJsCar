@@ -1,0 +1,133 @@
+@mixin position(
+  $position: null,
+  $left: null,
+  $top: null,
+  $bottom: null,
+  $right: null
+) {
+  @if $position != null {
+    position: $position;
+  }
+  @if $left != null {
+    left: $left;
+  }
+  @if $top != null {
+    top: $top;
+  }
+  @if $bottom != null {
+    bottom: $bottom;
+  }
+  @if $right != null {
+    right: $right;
+  }
+}
+@mixin font_size_color($font: null, $font_weight: null, $color: null) {
+  @if $font != null {
+    font-size: $font;
+  }
+  @if $font_weight != null {
+    font-weight: $font_weight;
+  }
+  @if $color != null {
+    color: $color;
+  }
+}
+
+@mixin width_height($height: null, $width: null) {
+  @if $height != null {
+    height: $height;
+  }
+  @if $width != null {
+    width: $width;
+  }
+}
+
+@mixin flex(
+  $flex: null,
+  $wrap: null,
+  $justify: null,
+  $align_item: null,
+  $gap: null,
+  $direction: null
+) {
+  @if $flex !=null {
+    display: $flex;
+  }
+  @if $justify != null {
+    justify-content: $justify;
+  }
+  @if $align_item != null {
+    align-items: $align_item;
+  }
+  @if $wrap != null {
+    flex-wrap: $wrap;
+  }
+  @if $direction != null {
+    flex-direction: $direction;
+  }
+  @if $gap != null {
+    gap: $gap;
+  }
+}
+
+@mixin grid(
+  $grid: null,
+  $justify: null,
+  $align_item: null,
+  $column: null,
+  $rows: null,
+  $gap: null
+) {
+  @if $grid !=null {
+    display: $grid;
+  }
+  @if $justify != null {
+    justify-content: $justify;
+  }
+  @if $align_item != null {
+    align-items: $align_item;
+  }
+  @if $column != null {
+    grid-template-columns: $column;
+  }
+  @if $rows != null {
+    grid-template-rows: $rows;
+  }
+  @if $gap != null {
+    grid-gap: $gap;
+  }
+}
+
+$desktop-screen-width: 1440px;
+$laptop-screen-width: 1280px;
+$ipad-pro-width: 1024px;
+$phone-width: 768px;
+$small-phone-width: 480px;
+
+@mixin device($media) {
+  @if $media == desktop {
+    @media only screen and (max-width: #{$desktop-screen-width}) {
+      @content;
+    }
+  }
+  @if $media == laptop {
+    @media only screen and (max-width: #{$laptop-screen-width}) {
+      @content;
+    }
+  }
+  @if $media == ipad {
+    @media only screen and (max-width: #{$ipad-pro-width}) {
+      @content;
+    }
+  }
+  @if $media == phone {
+    @media only screen and (max-width: #{$phone-width}) {
+      @content;
+    }
+  }
+  @if $media == sm-phone {
+    @media only screen and (max-width: #{$small-phone-width}) {
+      @content;
+    }
+  }
+}

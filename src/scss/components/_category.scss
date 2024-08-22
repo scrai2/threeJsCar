@@ -1,0 +1,31 @@
+.category-container {
+  &-list {
+    @include flex(flex, null, null, center, 24px, column);
+    position: absolute;
+    top: 26px;
+    left: 47px;
+    padding: 20px 10px ;
+    background-color: $grey-500;
+    @include width_height($height: auto, $width: 70px);
+    &-item {
+      @include flex(flex, null, null, center, 4px, column);
+      cursor: pointer;
+      &-dropIcon {
+        color: $white-base;
+        @include width_height($height: 21px, $width: 16px);
+      }
+      &-circleIcon {
+        color: $white-base;
+        @include width_height($height: 22.5px, $width: 22.5px);
+      }
+      &-photoIcon {
+        color: $white-base;
+        @include width_height($height: 22.5px, $width: 19.5px);
+      }
+      a {       
+        @include font_size_color($font: 14px, $font_weight: 400, $color: $white-base)
+      }
+      
+    }
+  }
+}

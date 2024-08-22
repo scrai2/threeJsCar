@@ -1,0 +1,66 @@
+.exterior-interior-action {
+  &-container {
+    cursor: pointer;
+    @include flex(flex, null, center, center, 18px);
+    @include width_height($height: 55px, $width: 210px);
+    background-color: $grey-500;
+    position: absolute;
+    bottom: 26px;
+    left: 189px;
+    padding: 10px 22px 10px 15px;
+svg{
+  color: $white-base;
+}
+
+    &-active{
+      background-color: $white-base;
+      svg{
+        color: $black-100;
+      }      
+    }
+
+    &-ext {
+      @include flex(flex, null, center, center, 5px);
+      padding: 8px 15px;      
+      @include width_height($height: 35px, $width: 90px);
+      &-extcarIcon {
+        @include width_height($height: 28px, $width: 22px);
+      }
+      &-content {
+        @include font_size_color(
+          $font: 16px,
+          $font_weight: 600,
+          $color: $white-base
+        );
+      }
+
+      &-activecontent{
+        color: $grey-500
+      }
+    }
+
+    &-active{
+      background-color: $white-base;
+    }
+    &-int{
+      @include flex(flex, null, center, center, 6px);
+      padding: 8px 15px;      
+      @include width_height($height: 35px, $width: 90px);
+      &-intseatIcon{
+        @include width_height($height: 20px, $width: 21px);
+      }
+      &-content{
+        @include font_size_color(
+          $font: 16px,
+          $font_weight: 600,
+          $color:  $white-base
+        );
+        &-activecontent{
+          color: $grey-500;
+        }
+      }
+      
+    }
+  }
+
+}

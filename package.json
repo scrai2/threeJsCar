@@ -1,0 +1,42 @@
+{
+  "name": "vyom-frontend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "webpack serve --mode=development --open",
+    "server": "src/index.html",
+    "build": "webpack",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/dat.gui": "^0.7.13",
+    "@types/node": "^20.9.0",
+    "@types/three": "^0.167.2",
+    "@types/uuid": "^9.0.6",
+    "copy-webpack-plugin": "^11.0.0",
+    "css-loader": "^6.8.1",
+    "dotenv-webpack": "^8.0.1",
+    "file-loader": "^6.2.0",
+    "html-webpack-plugin": "^5.5.3",
+    "node-sass": "^9.0.0",
+    "sass-loader": "^13.3.2",
+    "style-loader": "^3.3.3",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.5.2",
+    "webpack": "^5.89.0",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^4.15.1"
+  },
+  "dependencies": {
+    "axios": "^1.5.1",
+    "dat.gui": "^0.7.9",
+    "dotenv": "^16.3.1",
+    "mini-css-extract-plugin": "^2.7.6",
+    "three": "^0.158.0",
+    "uuid": "^9.0.1"
+  }
+}
