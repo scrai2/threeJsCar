@@ -2,8 +2,8 @@ import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
 export function loadModel(
-  scene: THREE.Scene, 
-  modelPath: string, 
+  scene: THREE.Scene,
+  modelPath: string,
   position: THREE.Vector3 = new THREE.Vector3(0, -1.75, 0),
   scale: THREE.Vector3 = new THREE.Vector3(1, 1, 1),
   rotation: THREE.Euler = new THREE.Euler(0, 0, 0)
@@ -22,12 +22,14 @@ export function loadModel(
         model.scale.copy(scale);
         scene.add(model);
 
+        // Log animations if any
         if (gltf.animations.length > 0) {
           gltf.animations.forEach((clip) => console.log(`Loaded animation: ${clip.name}`));
         } else {
           console.log("No animations found.");
         }
 
+        // Apply chrome material and environment map
         const envMap = loadCubeTexture();
         model.traverse((child) => {
           if (child instanceof THREE.Mesh && child.material) {
@@ -52,6 +54,10 @@ export function loadModel(
             }
           }
         });
+
+        // Add a visible boundary (bounding box) around the model
+        const boxHelper = new THREE.BoxHelper(model, 0xff0000); // Red color for the boundary
+        scene.add(boxHelper);
 
         resolve({ model, animations: gltf.animations });
       },

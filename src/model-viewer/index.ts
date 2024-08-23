@@ -8,11 +8,15 @@ import * as dat from 'dat.gui';
 export class ThreeJSComponent {
   private scene: THREE.Scene;
   private camera: THREE.PerspectiveCamera;
+  private camera2: THREE.PerspectiveCamera; // Second camera
+  private activeCamera: THREE.Camera;
   private renderer: THREE.WebGLRenderer;
   private controls: OrbitControls;
+  private controls2: OrbitControls; 
   private animationManager: AnimationManager | null = null;
   private canvas: HTMLCanvasElement;
   private isAnimationPlaying: boolean = false;
+  private moveSpeed: number = 0.1;  // Speed of camera movement
 
   public interiorCameraPosition = new THREE.Vector3(5, 2, 5);
   public interiorCameraTarget = new THREE.Vector3(0, 0, 0);
@@ -35,12 +39,21 @@ export class ThreeJSComponent {
     this.camera = new THREE.PerspectiveCamera(
       25,
       (window.innerWidth * 0.75) / window.innerHeight,
-      0.1,
+      0.01,
       100
     );
     this.camera.position.set(0, 5, 15);
+    this.camera2 = new THREE.PerspectiveCamera(
+      25,
+      (window.innerWidth * 0.75) / window.innerHeight,
+      0.01,
+      100
+    );
+
+    this.activeCamera = this.camera;
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+    this.controls2 = new OrbitControls(this.camera2, this.renderer.domElement); 
     this.controls.target.set(0, 0, 0);
     this.controls.enableDamping = true;
     this.controls.maxPolarAngle = Math.PI / 2;
@@ -53,13 +66,13 @@ export class ThreeJSComponent {
 
     this.addLighting();
     this.addFloor();
-    // createLights(this.scene)
+    createLights(this.scene)
 
     window.addEventListener('resize', this.onWindowResize.bind(this));
+    window.addEventListener('keydown', this.onKeyDown.bind(this)); // Add keydown event listener
 
     this.loadCarModel();
     this.animate();
-    this.setupGUI();
   }
 
   private setSize() {
@@ -91,13 +104,24 @@ export class ThreeJSComponent {
     floor.position.set(0, -1.8, 0);
     this.scene.add(floor);
   }
+  private positionSecondCamera(boundary: THREE.Box3) {
+    const center = new THREE.Vector3();
+    boundary.getCenter(center);
+    this.camera2.position.copy(center);
+    this.camera2.position.z += boundary.getSize(new THREE.Vector3()).length() / 2; // Offset to view the model
+    this.controls2.target.copy(center); // Ensure the second camera looks at the center of the model
+  }
 
   private loadCarModel() {
-    loadModel(this.scene, '../models/new/Ford_F150_animated.gltf')
+    loadModel(this.scene, '../models/Ford_f150_baked.gltf')
       .then(({ model, animations }) => {
         this.animationManager = new AnimationManager(model);
         this.animationManager.loadAnimations(animations);
         this.animationManager.setAnimationCompleteCallback(this.onAnimationComplete.bind(this));
+
+        // Get the bounding box of the model and position the second camera
+        const boundary = new THREE.Box3().setFromObject(model);
+        this.positionSecondCamera(boundary);
       })
       .catch((error) => {
         console.error('Error loading car model:', error);
@@ -122,8 +146,14 @@ export class ThreeJSComponent {
     this.renderer.setClearColor('#020202');
     this.renderer.clear();
     this.renderer.render(this.scene, this.camera);
+    this.renderer.render(this.scene, this.activeCamera); 
 
     this.controls.update();
+    this.controls2.update()
+  }
+
+  public switchCamera() {
+    this.activeCamera = this.activeCamera === this.camera ? this.camera2 : this.camera;
   }
 
   private onWindowResize() {
@@ -135,6 +165,41 @@ export class ThreeJSComponent {
   private onAnimationComplete() {
     this.isAnimationPlaying = false;
   }
+
+  // Method to handle keydown events
+  private onKeyDown(event: KeyboardEvent) {
+    const direction = new THREE.Vector3();
+  
+    switch (event.key) {
+      case 'w':
+        this.activeCamera.getWorldDirection(direction);
+        this.activeCamera.position.add(direction.multiplyScalar(this.moveSpeed));
+        break;
+      case 's':
+        this.activeCamera.getWorldDirection(direction);
+        this.activeCamera.position.add(direction.multiplyScalar(-this.moveSpeed));
+        break;
+      case 'a':
+        this.activeCamera.position.x -= this.moveSpeed;
+        break;
+      case 'd':
+        this.activeCamera.position.x += this.moveSpeed;
+        break;
+      case 'c': // Press 'c' to switch cameras
+        this.switchCamera();
+        break;
+    }
+    
+    this.controls.update();
+    this.controls2.update(); // Update controls for the second camera
+    this.logCameraPositionAndOrientation();
+  }
+
+  // Method to log the camera's position and orientation
+private logCameraPositionAndOrientation() {
+  console.log('Camera Position:', this.camera.position);
+  console.log('Camera Direction:', this.camera.getWorldDirection(new THREE.Vector3()));
+}
 
   public playAnimation(animationName: string) {
     if (this.animationManager) {
@@ -153,52 +218,4 @@ export class ThreeJSComponent {
     this.controls.target.copy(target);
     this.controls.update();
   }
-
-  private setupGUI() {
-  const gui = new dat.GUI();
-
-  // Create an object to hold the camera parameters
-  const cameraFolder = gui.addFolder('Camera');
-  
-  // Parameters object to hold the camera position and target
-  const cameraParams = {
-    positionX: this.camera.position.x,
-    positionY: this.camera.position.y,
-    positionZ: this.camera.position.z,
-    targetX: this.controls.target.x,
-    targetY: this.controls.target.y,
-    targetZ: this.controls.target.z
-  };
-
-  // Add controls for the camera position
-  cameraFolder.add(cameraParams, 'positionX', -100, 100).onChange((value) => {
-    this.camera.position.x = value;
-    this.camera.updateProjectionMatrix();
-  });
-  cameraFolder.add(cameraParams, 'positionY', -100, 100).onChange((value) => {
-    this.camera.position.y = value;
-    this.camera.updateProjectionMatrix();
-  });
-  cameraFolder.add(cameraParams, 'positionZ', -100, 100).onChange((value) => {
-    this.camera.position.z = value;
-    this.camera.updateProjectionMatrix();
-  });
-
-  // Add controls for the camera target
-  cameraFolder.add(cameraParams, 'targetX', -100, 100).onChange((value) => {
-    this.controls.target.x = value;
-    this.controls.update();
-  });
-  cameraFolder.add(cameraParams, 'targetY', -100, 100).onChange((value) => {
-    this.controls.target.y = value;
-    this.controls.update();
-  });
-  cameraFolder.add(cameraParams, 'targetZ', -100, 100).onChange((value) => {
-    this.controls.target.z = value;
-    this.controls.update();
-  });
-
-  cameraFolder.open();
-}
-
 }

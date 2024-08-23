@@ -8,7 +8,7 @@ export const loadActions = (container: string) => {
   loadLightOnOffAction(container);
   loadExteriorInteriorAction(container);
   loadOpenCloseDoorAction(container);
-  loadRotateAction(container);
+  // loadRotateAction(container);
 };
 
 
