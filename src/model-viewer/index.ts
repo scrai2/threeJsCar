@@ -14,6 +14,8 @@ export class ThreeJSComponent {
   private canvas: HTMLCanvasElement;
   private isAnimationPlaying: boolean = false;
 
+  private keysPressed: { [key: string]: boolean } = {};
+
   public interiorCameraPosition = new THREE.Vector3(5, 2, 5);
   public interiorCameraTarget = new THREE.Vector3(0, 0, 0);
 
@@ -35,7 +37,7 @@ export class ThreeJSComponent {
     this.camera = new THREE.PerspectiveCamera(
       25,
       (window.innerWidth * 0.75) / window.innerHeight,
-      0.1,
+      0.01,
       100
     );
     this.camera.position.set(0, 5, 15);
@@ -47,19 +49,20 @@ export class ThreeJSComponent {
     this.controls.enableZoom = true;
     this.controls.enablePan = false;
     this.controls.rotateSpeed = 0.5;
-    this.controls.minDistance = 3;
+    this.controls.minDistance = 0;
     this.controls.maxDistance = 20;
     this.controls.screenSpacePanning = false;
 
     this.addLighting();
     this.addFloor();
-    // createLights(this.scene)
-
+    createLights(this.scene)
+  
     window.addEventListener('resize', this.onWindowResize.bind(this));
+    window.addEventListener('keydown', this.onKeyDown.bind(this));
+    window.addEventListener('keyup', this.onKeyUp.bind(this));
 
     this.loadCarModel();
     this.animate();
-    this.setupGUI();
   }
 
   private setSize() {
@@ -110,6 +113,8 @@ export class ThreeJSComponent {
     const deltaTime = 0.10;
     this.animationManager?.update(deltaTime);
 
+    this.handleCameraMovement(deltaTime);
+
     this.renderer.setViewport(0, 0, window.innerWidth * 0.25, window.innerHeight);
     this.renderer.setScissor(0, 0, window.innerWidth * 0.25, window.innerHeight);
     this.renderer.setScissorTest(true);
@@ -124,6 +129,32 @@ export class ThreeJSComponent {
     this.renderer.render(this.scene, this.camera);
 
     this.controls.update();
+  }
+
+  private handleCameraMovement(deltaTime: number) {
+    const moveSpeed = 1 * deltaTime;
+
+    if (this.keysPressed['w']) {
+      this.camera.translateZ(-moveSpeed);
+    }
+    if (this.keysPressed['s']) {
+      this.camera.translateZ(moveSpeed);
+    }
+    if (this.keysPressed['a']) {
+      this.camera.translateX(-moveSpeed);
+    }
+    if (this.keysPressed['d']) {
+      this.camera.translateX(moveSpeed);
+    }
+  }
+
+  private onKeyDown(event: KeyboardEvent) {
+    this.keysPressed[event.key.toLowerCase()] = true;
+    console.log("camera ", this.camera.position)
+  }
+
+  private onKeyUp(event: KeyboardEvent) {
+    this.keysPressed[event.key.toLowerCase()] = false;
   }
 
   private onWindowResize() {
@@ -153,52 +184,4 @@ export class ThreeJSComponent {
     this.controls.target.copy(target);
     this.controls.update();
   }
-
-  private setupGUI() {
-  const gui = new dat.GUI();
-
-  // Create an object to hold the camera parameters
-  const cameraFolder = gui.addFolder('Camera');
-  
-  // Parameters object to hold the camera position and target
-  const cameraParams = {
-    positionX: this.camera.position.x,
-    positionY: this.camera.position.y,
-    positionZ: this.camera.position.z,
-    targetX: this.controls.target.x,
-    targetY: this.controls.target.y,
-    targetZ: this.controls.target.z
-  };
-
-  // Add controls for the camera position
-  cameraFolder.add(cameraParams, 'positionX', -100, 100).onChange((value) => {
-    this.camera.position.x = value;
-    this.camera.updateProjectionMatrix();
-  });
-  cameraFolder.add(cameraParams, 'positionY', -100, 100).onChange((value) => {
-    this.camera.position.y = value;
-    this.camera.updateProjectionMatrix();
-  });
-  cameraFolder.add(cameraParams, 'positionZ', -100, 100).onChange((value) => {
-    this.camera.position.z = value;
-    this.camera.updateProjectionMatrix();
-  });
-
-  // Add controls for the camera target
-  cameraFolder.add(cameraParams, 'targetX', -100, 100).onChange((value) => {
-    this.controls.target.x = value;
-    this.controls.update();
-  });
-  cameraFolder.add(cameraParams, 'targetY', -100, 100).onChange((value) => {
-    this.controls.target.y = value;
-    this.controls.update();
-  });
-  cameraFolder.add(cameraParams, 'targetZ', -100, 100).onChange((value) => {
-    this.controls.target.z = value;
-    this.controls.update();
-  });
-
-  cameraFolder.open();
-}
-
 }
