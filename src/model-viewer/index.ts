@@ -16,7 +16,7 @@ export class ThreeJSComponent {
 
   private keysPressed: { [key: string]: boolean } = {};
 
-  public interiorCameraPosition = new THREE.Vector3(5, 2, 5);
+  public interiorCameraPosition = new THREE.Vector3(1, -5, 0);
   public interiorCameraTarget = new THREE.Vector3(0, 0, 0);
 
   public exteriorCameraPosition = new THREE.Vector3(0, 5, 15);
