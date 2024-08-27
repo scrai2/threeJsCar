@@ -55,10 +55,17 @@ export const loadRotateAction = (container: string) => {
 export const loadExteriorInteriorAction = (container: string) => {
   const exteriorInteriorContainer = $query(".exterior-interior-action");
   exteriorInteriorContainer?.remove();
-  $id(container)?.insertAdjacentHTML(
-    "beforeend",
-    renderExteriorInteriorAction()
-  );
+  
+  const targetContainer = $id(container);
+  if (targetContainer) {
+    targetContainer.insertAdjacentHTML(
+      "beforeend",
+      renderExteriorInteriorAction()
+    );
+  } else {
+    console.error(`Container with id ${container} not found.`);
+    return;
+  }
 
   const exteriorButton = $query(".exterior-interior-action-container-ext");
   const interiorButton = $query(".exterior-interior-action-container-int");
@@ -67,24 +74,28 @@ export const loadExteriorInteriorAction = (container: string) => {
     exteriorButton.addEventListener("click", () => {
       console.log("Exterior button clicked!");
       if (globals.threeJSComponent) {
-        globals.threeJSComponent.setCameraPosition(globals.threeJSComponent.exteriorCameraPosition, globals.threeJSComponent.exteriorCameraTarget);
+        globals.threeJSComponent.switchToExteriorCamera();
       } else {
         console.error("ThreeJSComponent instance is not initialized.");
       }
     });
+  } else {
+    console.error("Exterior button not found.");
   }
 
   if (interiorButton) {
     interiorButton.addEventListener("click", () => {
-      console.log("Interior button clicked!");
-      if (globals.threeJSComponent) {
-        globals.threeJSComponent.setCameraPosition(globals.threeJSComponent.interiorCameraPosition, globals.threeJSComponent.interiorCameraTarget);
+      if (globals.threeJSComponent ) {
+        globals.threeJSComponent.switchToInteriorCamera();
       } else {
-        console.error("ThreeJSComponent instance is not initialized.");
+        console.error("ThreeJSComponent or interiorCamera instance is not initialized.");
       }
     });
+  } else {
+    console.error("Interior button not found.");
   }
 };
+
 
 
 export const loadLightOnOffAction = (container: string) => {

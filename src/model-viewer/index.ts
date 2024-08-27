@@ -1,9 +1,11 @@
+// ThreeJSComponent.ts
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { loadModel } from './loadModel';
 import { AnimationManager } from '../entity-models/customAnimation';
 import { createLights } from './light';
 import * as dat from 'dat.gui';
+import { InteriorCamera } from './interiorCamera';
 
 export class ThreeJSComponent {
   private scene: THREE.Scene;
@@ -16,8 +18,8 @@ export class ThreeJSComponent {
 
   private keysPressed: { [key: string]: boolean } = {};
 
-  public interiorCameraPosition = new THREE.Vector3(1, -5, 0);
-  public interiorCameraTarget = new THREE.Vector3(0, 0, 0);
+  public interiorCamera: InteriorCamera | null = null;
+  public currentCamera: 'exterior' | 'interior' = 'exterior';
 
   public exteriorCameraPosition = new THREE.Vector3(0, 5, 15);
   public exteriorCameraTarget = new THREE.Vector3(0, 0, 0);
@@ -41,6 +43,7 @@ export class ThreeJSComponent {
       100
     );
     this.camera.position.set(0, 5, 15);
+    this.interiorCamera = new InteriorCamera(this.canvas, this.scene);
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.target.set(0, 0, 0);
@@ -55,8 +58,10 @@ export class ThreeJSComponent {
 
     this.addLighting();
     this.addFloor();
-    createLights(this.scene)
-  
+    // createLights(this.scene);
+
+
+
     window.addEventListener('resize', this.onWindowResize.bind(this));
     window.addEventListener('keydown', this.onKeyDown.bind(this));
     window.addEventListener('keyup', this.onKeyUp.bind(this));
@@ -71,7 +76,7 @@ export class ThreeJSComponent {
   }
 
   private addLighting() {
-    const spotLight = new THREE.SpotLight(0xffffff, 3, 100, 0.344, 0.1, 1);
+    const spotLight = new THREE.SpotLight(0xffffff, 12, 100, 0.344, 0.1, 1);
     spotLight.position.set(0, 10, 0);
     spotLight.castShadow = true;
     spotLight.target.position.set(0, 0, 0);
@@ -109,27 +114,34 @@ export class ThreeJSComponent {
 
   private animate() {
     requestAnimationFrame(this.animate.bind(this));
-
+  
     const deltaTime = 0.10;
     this.animationManager?.update(deltaTime);
-
+  
     this.handleCameraMovement(deltaTime);
-
+  
     this.renderer.setViewport(0, 0, window.innerWidth * 0.25, window.innerHeight);
     this.renderer.setScissor(0, 0, window.innerWidth * 0.25, window.innerHeight);
     this.renderer.setScissorTest(true);
     this.renderer.setClearColor('#020202');
     this.renderer.clear();
-
+  
     this.renderer.setViewport(window.innerWidth * 0.25, 0, window.innerWidth * 0.75, window.innerHeight);
     this.renderer.setScissor(window.innerWidth * 0.25, 0, window.innerWidth * 0.75, window.innerHeight);
     this.renderer.setScissorTest(true);
     this.renderer.setClearColor('#020202');
     this.renderer.clear();
-    this.renderer.render(this.scene, this.camera);
-
-    this.controls.update();
+  
+    if (this.currentCamera === 'interior' && this.interiorCamera) {
+      // this.interiorCamera.updateControls();
+      this.renderer.render(this.scene, this.interiorCamera.camera);
+      
+    } else {
+      this.controls.update();
+      this.renderer.render(this.scene, this.camera);
+    }
   }
+  
 
   private handleCameraMovement(deltaTime: number) {
     const moveSpeed = 1 * deltaTime;
@@ -161,6 +173,7 @@ export class ThreeJSComponent {
     this.camera.aspect = (window.innerWidth * 0.75) / window.innerHeight;
     this.camera.updateProjectionMatrix();
     this.setSize();
+    this.interiorCamera?.resizeCamera(); // Ensure interior camera resizes as well
   }
 
   private onAnimationComplete() {
@@ -179,9 +192,33 @@ export class ThreeJSComponent {
   }
 
   public setCameraPosition(position: THREE.Vector3, target: THREE.Vector3) {
-    this.camera.position.copy(position);
-    this.camera.lookAt(target);
-    this.controls.target.copy(target);
-    this.controls.update();
+    if (this.currentCamera === 'interior' && this.interiorCamera) {
+      this.interiorCamera.setCameraPosition(position, target);
+    } else {
+      this.camera.position.copy(position);
+      this.camera.lookAt(target);
+      if (this.controls) {
+        this.controls.target.copy(target);
+        this.controls.update();
+      }
+    }
   }
+
+  public switchToInteriorCamera() {
+    this.currentCamera = 'interior';
+    console.log("her")
+    if (this.interiorCamera) {
+      this.controls.enabled = false; // Disable exterior controls
+      this.renderer.render(this.scene, this.interiorCamera.camera); // Render using interior camera
+    }
+  }
+  
+  public switchToExteriorCamera() {
+    this.currentCamera = 'exterior';
+    if (this.controls) {
+      this.controls.enabled = true; // Enable exterior controls
+    }
+    this.renderer.render(this.scene, this.camera); // Render using exterior camera
+  }
+  
 }
