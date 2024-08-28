@@ -3,9 +3,10 @@ import Icons from "../../assests/icons/icons.svg";
 import pubsub from "../../shared/pubsub";
 import { PUBSUB_CONSTANTS } from "../../utils/constants";
 import { CATEGORIES } from "../category/category";
-import { $id, $query } from "../../utils/dom";
+import { $id, $query, $queryAll } from "../../utils/dom";
+import { ThreeJSComponent } from "../../model-viewer";
 
-export const loadOptions = (container: string) => {
+export const loadOptions = (container: string, component: ThreeJSComponent) => {
   pubsub.subscribe(
     PUBSUB_CONSTANTS.CATEGORY_SELECT_EVENT,
     ({
@@ -20,7 +21,7 @@ export const loadOptions = (container: string) => {
       const { availableOptions, path } = CATEGORIES.find(
         (category) => category.id === id
       )!;
-      initializeSwatches(availableOptions, container, id, name, path);
+      initializeSwatches(availableOptions, container, id, name, path, component);
     }
   );
 };
@@ -30,7 +31,8 @@ export const initializeSwatches = (
   container: string,
   categoryId: number,
   categoryName: string,
-  thumbnail: string
+  thumbnail: string,
+  component: ThreeJSComponent,
 ) => {
   const visualizerContainer = $id(container)!;
   const swatchContainer = $query(
@@ -54,9 +56,20 @@ export const initializeSwatches = (
       newSwatchContainer.classList.remove("side-bar-open");
     });
   }
-};
 
-export const loadCategoriesOptions = () => {};
+  // Attach click event listeners to the options
+  const optionItems = $queryAll(".swatch-category-options-list-item");
+  optionItems.forEach((item) => {
+    item.addEventListener("click", (event) => {
+      const target = event.currentTarget as HTMLElement;
+      const optionName = target.getAttribute("data-swatch-name");
+      if (optionName) {
+        component.changeCarPaintColor(optionName)
+        console.log(`Option clicked: ${optionName}`);
+      }
+    });
+  });
+};
 
 export const renderCategoryOptions = (
   availableOptions: IAvailableOptions[],

@@ -1,9 +1,11 @@
+// ThreeJSComponent.ts
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { loadModel } from './loadModel';
 import { AnimationManager } from '../entity-models/customAnimation';
 import { createLights } from './light';
 import * as dat from 'dat.gui';
+import { InteriorCamera } from './interiorCamera';
 
 export class ThreeJSComponent {
   private scene: THREE.Scene;
@@ -14,8 +16,10 @@ export class ThreeJSComponent {
   private canvas: HTMLCanvasElement;
   private isAnimationPlaying: boolean = false;
 
-  public interiorCameraPosition = new THREE.Vector3(5, 2, 5);
-  public interiorCameraTarget = new THREE.Vector3(0, 0, 0);
+  private keysPressed: { [key: string]: boolean } = {};
+
+  public interiorCamera: InteriorCamera | null = null;
+  public currentCamera: 'exterior' | 'interior' = 'exterior';
 
   public exteriorCameraPosition = new THREE.Vector3(0, 5, 15);
   public exteriorCameraTarget = new THREE.Vector3(0, 0, 0);
@@ -35,10 +39,11 @@ export class ThreeJSComponent {
     this.camera = new THREE.PerspectiveCamera(
       25,
       (window.innerWidth * 0.75) / window.innerHeight,
-      0.1,
+      0.01,
       100
     );
     this.camera.position.set(0, 5, 15);
+    this.interiorCamera = new InteriorCamera(this.canvas, this.scene);
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.target.set(0, 0, 0);
@@ -47,19 +52,22 @@ export class ThreeJSComponent {
     this.controls.enableZoom = true;
     this.controls.enablePan = false;
     this.controls.rotateSpeed = 0.5;
-    this.controls.minDistance = 3;
+    this.controls.minDistance = 0;
     this.controls.maxDistance = 20;
     this.controls.screenSpacePanning = false;
 
     this.addLighting();
     this.addFloor();
-    // createLights(this.scene)
+    createLights(this.scene);
+
+
 
     window.addEventListener('resize', this.onWindowResize.bind(this));
+    window.addEventListener('keydown', this.onKeyDown.bind(this));
+    window.addEventListener('keyup', this.onKeyUp.bind(this));
 
     this.loadCarModel();
     this.animate();
-    this.setupGUI();
   }
 
   private setSize() {
@@ -68,7 +76,7 @@ export class ThreeJSComponent {
   }
 
   private addLighting() {
-    const spotLight = new THREE.SpotLight(0xffffff, 3, 100, 0.344, 0.1, 1);
+    const spotLight = new THREE.SpotLight(0xffffff, 12, 100, 0.344, 0.1, 1);
     spotLight.position.set(0, 10, 0);
     spotLight.castShadow = true;
     spotLight.target.position.set(0, 0, 0);
@@ -106,30 +114,64 @@ export class ThreeJSComponent {
 
   private animate() {
     requestAnimationFrame(this.animate.bind(this));
-
+  
     const deltaTime = 0.10;
     this.animationManager?.update(deltaTime);
-
+  
+    this.handleCameraMovement(deltaTime);
+  
     this.renderer.setViewport(0, 0, window.innerWidth * 0.25, window.innerHeight);
     this.renderer.setScissor(0, 0, window.innerWidth * 0.25, window.innerHeight);
     this.renderer.setScissorTest(true);
     this.renderer.setClearColor('#020202');
     this.renderer.clear();
-
+  
     this.renderer.setViewport(window.innerWidth * 0.25, 0, window.innerWidth * 0.75, window.innerHeight);
     this.renderer.setScissor(window.innerWidth * 0.25, 0, window.innerWidth * 0.75, window.innerHeight);
     this.renderer.setScissorTest(true);
     this.renderer.setClearColor('#020202');
     this.renderer.clear();
-    this.renderer.render(this.scene, this.camera);
+  
+    if (this.currentCamera === 'interior' && this.interiorCamera) {
+      this.renderer.render(this.scene, this.interiorCamera.camera);
+      
+    } else {
+      this.controls.update();
+      this.renderer.render(this.scene, this.camera);
+    }
+  }
+  
 
-    this.controls.update();
+  private handleCameraMovement(deltaTime: number) {
+    const moveSpeed = 1 * deltaTime;
+
+    if (this.keysPressed['w']) {
+      this.camera.translateZ(-moveSpeed);
+    }
+    if (this.keysPressed['s']) {
+      this.camera.translateZ(moveSpeed);
+    }
+    if (this.keysPressed['a']) {
+      this.camera.translateX(-moveSpeed);
+    }
+    if (this.keysPressed['d']) {
+      this.camera.translateX(moveSpeed);
+    }
+  }
+
+  private onKeyDown(event: KeyboardEvent) {
+    this.keysPressed[event.key.toLowerCase()] = true;
+  }
+
+  private onKeyUp(event: KeyboardEvent) {
+    this.keysPressed[event.key.toLowerCase()] = false;
   }
 
   private onWindowResize() {
     this.camera.aspect = (window.innerWidth * 0.75) / window.innerHeight;
     this.camera.updateProjectionMatrix();
     this.setSize();
+    this.interiorCamera?.resizeCamera(); // Ensure interior camera resizes as well
   }
 
   private onAnimationComplete() {
@@ -148,57 +190,58 @@ export class ThreeJSComponent {
   }
 
   public setCameraPosition(position: THREE.Vector3, target: THREE.Vector3) {
-    this.camera.position.copy(position);
-    this.camera.lookAt(target);
-    this.controls.target.copy(target);
-    this.controls.update();
+    if (this.currentCamera === 'interior' && this.interiorCamera) {
+      this.interiorCamera.setCameraPosition(position, target);
+    } else {
+      this.camera.position.copy(position);
+      this.camera.lookAt(target);
+      if (this.controls) {
+        this.controls.target.copy(target);
+        this.controls.update();
+      }
+    }
   }
 
-  private setupGUI() {
-  const gui = new dat.GUI();
-
-  // Create an object to hold the camera parameters
-  const cameraFolder = gui.addFolder('Camera');
+  public switchToInteriorCamera() {
+    this.currentCamera = 'interior';
+    if (this.interiorCamera) {
+      this.interiorCamera.resetCamera(); 
+      this.controls.enabled = false; 
+      this.renderer.render(this.scene, this.interiorCamera.camera); 
+    }
+  }
   
-  // Parameters object to hold the camera position and target
-  const cameraParams = {
-    positionX: this.camera.position.x,
-    positionY: this.camera.position.y,
-    positionZ: this.camera.position.z,
-    targetX: this.controls.target.x,
-    targetY: this.controls.target.y,
-    targetZ: this.controls.target.z
-  };
+  public switchToExteriorCamera() {
+    this.currentCamera = 'exterior';
+    if (this.controls) {
+      this.controls.enabled = true; 
+    }
+    this.renderer.render(this.scene, this.camera); 
+  }
 
-  // Add controls for the camera position
-  cameraFolder.add(cameraParams, 'positionX', -100, 100).onChange((value) => {
-    this.camera.position.x = value;
-    this.camera.updateProjectionMatrix();
-  });
-  cameraFolder.add(cameraParams, 'positionY', -100, 100).onChange((value) => {
-    this.camera.position.y = value;
-    this.camera.updateProjectionMatrix();
-  });
-  cameraFolder.add(cameraParams, 'positionZ', -100, 100).onChange((value) => {
-    this.camera.position.z = value;
-    this.camera.updateProjectionMatrix();
-  });
+  public updateColor(colorCode: string) {
+    console.log("this and that")
+    this.changeCarPaintColor(colorCode);
+  }
 
-  // Add controls for the camera target
-  cameraFolder.add(cameraParams, 'targetX', -100, 100).onChange((value) => {
-    this.controls.target.x = value;
-    this.controls.update();
-  });
-  cameraFolder.add(cameraParams, 'targetY', -100, 100).onChange((value) => {
-    this.controls.target.y = value;
-    this.controls.update();
-  });
-  cameraFolder.add(cameraParams, 'targetZ', -100, 100).onChange((value) => {
-    this.controls.target.z = value;
-    this.controls.update();
-  });
-
-  cameraFolder.open();
-}
-
+  public changeCarPaintColor(colorCode: string) {
+    if (!this.animationManager) {
+      console.error('AnimationManager is not initialized.');
+      return;
+    }
+  
+    this.animationManager.model.traverse((child) => {
+      if (child instanceof THREE.Mesh) {
+        const materials = Array.isArray(child.material) ? child.material : [child.material];
+        materials.forEach((material: THREE.Material) => {
+          console.log("mat0", material)
+          if (material.name === 'Car_paint_Original') {
+            (material as THREE.MeshPhysicalMaterial).color.set(colorCode);
+          }
+        });
+      }
+    });
+  }
+  
+  
 }

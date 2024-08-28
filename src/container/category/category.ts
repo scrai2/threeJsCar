@@ -4,6 +4,7 @@ import { $id, $query, $queryAll } from "../../utils/dom";
 import { loadOptions } from "../options/options";
 import { INITIAL_PAYLOAD, PUBSUB_CONSTANTS } from "../../utils/constants";
 import pubsub from "../../shared/pubsub";
+import { ThreeJSComponent } from "../../model-viewer";
 // import {
 //   changeModelColor,
 //   changeWheels,
@@ -74,38 +75,20 @@ export const CATEGORIES: ICategory[] = [
   },
 ];
 
-export const attachCategoryOptionClickEvents = (
-  component: any,
-  categoryId: number
-) => {
-  const map: { [key: string]: any } = {
-    // 3801: changeModelColor,
-    // 3802: changeWheels,
-  };
-  const defaultFun = () => {};
-  return map[categoryId] ?? defaultFun;
-};
-
-export const loadCategories = (container: string, component: any) => {
+export const loadCategories = (container: string, component: ThreeJSComponent) => {
   const categoryContainer = $query(`.category-container`);
   const swatchContainer = $query(`.swatch-category`);
   swatchContainer?.remove();
   categoryContainer?.remove();
   if (CATEGORIES.length > 0) {
     $id(container)?.insertAdjacentHTML("beforeend", renderCategory(CATEGORIES));
-    loadOptions(INITIAL_PAYLOAD.visualizerContainer);
+    loadOptions(INITIAL_PAYLOAD.visualizerContainer, component);
     const categoryLi = $queryAll("ul.category-container-list li");
     if (categoryLi.length > 0) categoryClick(categoryLi[0] as HTMLElement);
     categoryLi.forEach((element) =>
       element.addEventListener("click", (event) => {
         categoryClick(event.target as HTMLElement);
-
         const catId = element.getAttribute("data-category-id");
-        const onClick = attachCategoryOptionClickEvents(
-          component,
-          Number(catId)
-        );
-        // attachOptionButtonClickEvents(component, onClick);
         const swatchContainer = $query(".swatch-category");
         if (swatchContainer) {
           setTimeout(function () {
