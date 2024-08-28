@@ -6,7 +6,7 @@ export class AnimationManager {
   private currentAction: THREE.AnimationAction | null = null;
   public onAnimationComplete: (() => void) | null = null;
 
-  constructor(private model: THREE.Group) {
+  constructor(public model: THREE.Group) {
     this.mixer = new THREE.AnimationMixer(this.model);
   }
 

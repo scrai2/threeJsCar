@@ -58,7 +58,7 @@ export class ThreeJSComponent {
 
     this.addLighting();
     this.addFloor();
-    // createLights(this.scene);
+    createLights(this.scene);
 
 
 
@@ -133,7 +133,6 @@ export class ThreeJSComponent {
     this.renderer.clear();
   
     if (this.currentCamera === 'interior' && this.interiorCamera) {
-      // this.interiorCamera.updateControls();
       this.renderer.render(this.scene, this.interiorCamera.camera);
       
     } else {
@@ -162,7 +161,6 @@ export class ThreeJSComponent {
 
   private onKeyDown(event: KeyboardEvent) {
     this.keysPressed[event.key.toLowerCase()] = true;
-    console.log("camera ", this.camera.position)
   }
 
   private onKeyUp(event: KeyboardEvent) {
@@ -206,19 +204,44 @@ export class ThreeJSComponent {
 
   public switchToInteriorCamera() {
     this.currentCamera = 'interior';
-    console.log("her")
     if (this.interiorCamera) {
-      this.controls.enabled = false; // Disable exterior controls
-      this.renderer.render(this.scene, this.interiorCamera.camera); // Render using interior camera
+      this.interiorCamera.resetCamera(); 
+      this.controls.enabled = false; 
+      this.renderer.render(this.scene, this.interiorCamera.camera); 
     }
   }
   
   public switchToExteriorCamera() {
     this.currentCamera = 'exterior';
     if (this.controls) {
-      this.controls.enabled = true; // Enable exterior controls
+      this.controls.enabled = true; 
     }
-    this.renderer.render(this.scene, this.camera); // Render using exterior camera
+    this.renderer.render(this.scene, this.camera); 
   }
+
+  public updateColor(colorCode: string) {
+    console.log("this and that")
+    this.changeCarPaintColor(colorCode);
+  }
+
+  public changeCarPaintColor(colorCode: string) {
+    if (!this.animationManager) {
+      console.error('AnimationManager is not initialized.');
+      return;
+    }
+  
+    this.animationManager.model.traverse((child) => {
+      if (child instanceof THREE.Mesh) {
+        const materials = Array.isArray(child.material) ? child.material : [child.material];
+        materials.forEach((material: THREE.Material) => {
+          console.log("mat0", material)
+          if (material.name === 'Car_paint_Original') {
+            (material as THREE.MeshPhysicalMaterial).color.set(colorCode);
+          }
+        });
+      }
+    });
+  }
+  
   
 }

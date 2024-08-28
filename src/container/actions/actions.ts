@@ -8,7 +8,7 @@ export const loadActions = (container: string) => {
   loadLightOnOffAction(container);
   loadExteriorInteriorAction(container);
   loadOpenCloseDoorAction(container);
-  loadRotateAction(container);
+  // loadRotateAction(container);
 };
 
 
@@ -73,6 +73,16 @@ export const loadExteriorInteriorAction = (container: string) => {
   if (exteriorButton) {
     exteriorButton.addEventListener("click", () => {
       console.log("Exterior button clicked!");
+
+      const activeButton = $query(".exterior-interior-action-container-active");
+      if (activeButton) {
+        activeButton.classList.remove("exterior-interior-action-container-active");
+        $query(".exterior-interior-action-container-activecontent")?.classList.remove("exterior-interior-action-container-activecontent");
+      }
+
+      exteriorButton.classList.add("exterior-interior-action-container-active");
+      $query(".exterior-interior-action-container-ext-content")?.classList.add("exterior-interior-action-container-ext-activecontent");
+
       if (globals.threeJSComponent) {
         globals.threeJSComponent.switchToExteriorCamera();
       } else {
@@ -85,7 +95,18 @@ export const loadExteriorInteriorAction = (container: string) => {
 
   if (interiorButton) {
     interiorButton.addEventListener("click", () => {
-      if (globals.threeJSComponent ) {
+      console.log("Interior button clicked!");
+
+      const activeButton = $query(".exterior-interior-action-container-active");
+      if (activeButton) {
+        activeButton.classList.remove("exterior-interior-action-container-active");
+        $query(".exterior-interior-action-container-activecontent")?.classList.remove("exterior-interior-action-container-activecontent");
+      }
+
+      interiorButton.classList.add("exterior-interior-action-container-active");
+      $query(".exterior-interior-action-container-int-content")?.classList.add("exterior-interior-action-container-activecontent");
+
+      if (globals.threeJSComponent) {
         globals.threeJSComponent.switchToInteriorCamera();
       } else {
         console.error("ThreeJSComponent or interiorCamera instance is not initialized.");
@@ -95,6 +116,7 @@ export const loadExteriorInteriorAction = (container: string) => {
     console.error("Interior button not found.");
   }
 };
+
 
 
 
