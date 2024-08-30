@@ -29,7 +29,7 @@ export const attachChatIntentEvents = async (
       handleChangeViewIntent(query, intentResponse);
       break;
     case INTENTS.DOOR_OPEN:
-    //   handleDoorOpenIntent(query, intentResponse);
+      handleDoorOpenIntent(query, intentResponse);
       break;
     case INTENTS.INTERIOR_SHOW:
     //   handleExteriorInteriorViewIntent(query, intentResponse);
@@ -142,27 +142,28 @@ export const handleChangeViewIntent = (
   intentResponse: IGetActionIntent
 ) => {};
 
-// export const handleDoorOpenIntent = (
-//   query: string,
-//   intentResponse: IGetActionIntent
-// ) => {
-//   clearChatInputField();
+export const handleDoorOpenIntent = (
+  query: string,
+  intentResponse: IGetActionIntent
+) => {
+  clearChatInputField();
 
-//   if (intentResponse.value) { 
-//     if (modelViewerComponent.car.isDoorOpen) {
-//       intentResponse.message = "Door is already open";
-//     } else {
-//       modelViewerComponent.doorsToggle();
-//     }
-//   } else { 
-//     if (modelViewerComponent.car.isDoorOpen) {
-//       modelViewerComponent.doorsToggle();
-//     } else {
-//       intentResponse.message = "Door is already closed";
-//     }
-//   }
-//   publishChat(query, intentResponse.message);
-// };
+  const doorCheck = globals.threeJSComponent?.getCurrentIsDoorStatus();
+  if (intentResponse.value) { 
+    if (doorCheck) {  
+      intentResponse.message = "Door is already open";
+    } else {
+      globals.threeJSComponent?.playAnimation("All_Doors_Opening")
+    }
+  } else { 
+    if (!doorCheck) {
+      globals.threeJSComponent?.playAnimation("All_doors_closing")
+    } else {
+      intentResponse.message = "Door is already closed";
+    }
+  }
+  publishChat(query, intentResponse.message);
+};
 
 // export const handleHeadlightOnIntent = (
 //   query: string,

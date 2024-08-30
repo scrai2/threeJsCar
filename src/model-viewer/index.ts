@@ -18,6 +18,7 @@ export class ThreeJSComponent {
 
   public interiorCamera: InteriorCamera | null = null;
   public currentCamera: 'exterior' | 'interior' = 'exterior';
+  public isDoorOpen: boolean = false;
 
   public exteriorCameraPosition = new THREE.Vector3(0, 5, 15);
   public exteriorCameraTarget = new THREE.Vector3(0, 0, 0);
@@ -180,8 +181,11 @@ export class ThreeJSComponent {
   public playAnimation(animationName: string) {
     if (this.animationManager) {
       this.animationManager.setAnimationCompleteCallback(() => {
-        if (animationName === "All_Doors_Opening") {
-          this.playAnimation("All_doors_closing");
+        if (animationName === 'All_Doors_Opening') {
+          this.isDoorOpen = true; // Update isDoorOpen to true when opening
+          this.playAnimation('All_doors_closing');
+        } else if (animationName === 'All_doors_closing') {
+          this.isDoorOpen = false; // Update isDoorOpen to false when closing
         }
       });
       this.animationManager.playAnimation(animationName);
@@ -256,6 +260,10 @@ export class ThreeJSComponent {
     });
   
     return currentColor;
+  }
+
+  public getCurrentIsDoorStatus(): boolean {
+    return this.isDoorOpen;
   }
   
   
