@@ -1,10 +1,8 @@
-// ThreeJSComponent.ts
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { loadModel } from './loadModel';
 import { AnimationManager } from '../entity-models/customAnimation';
 import { createLights } from './light';
-import * as dat from 'dat.gui';
 import { InteriorCamera } from './interiorCamera';
 
 export class ThreeJSComponent {
@@ -20,6 +18,7 @@ export class ThreeJSComponent {
 
   public interiorCamera: InteriorCamera | null = null;
   public currentCamera: 'exterior' | 'interior' = 'exterior';
+  public isDoorOpen: boolean = false;
 
   public exteriorCameraPosition = new THREE.Vector3(0, 5, 15);
   public exteriorCameraTarget = new THREE.Vector3(0, 0, 0);
@@ -27,6 +26,7 @@ export class ThreeJSComponent {
   constructor(canvasId: string) {
     this.canvas = document.getElementById(canvasId) as HTMLCanvasElement;
     if (!this.canvas) throw new Error(`Canvas element with id ${canvasId} not found`);
+    
 
     this.scene = new THREE.Scene();
     this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, antialias: true });
@@ -101,7 +101,7 @@ export class ThreeJSComponent {
   }
 
   private loadCarModel() {
-    loadModel(this.scene, '../models/new/Ford_F150_animated.gltf')
+    loadModel(this.scene, 'https://d7to0drpifvba.cloudfront.net/3d-models/f-150/Ford_f150.gltf')
       .then(({ model, animations }) => {
         this.animationManager = new AnimationManager(model);
         this.animationManager.loadAnimations(animations);
@@ -171,7 +171,7 @@ export class ThreeJSComponent {
     this.camera.aspect = (window.innerWidth * 0.75) / window.innerHeight;
     this.camera.updateProjectionMatrix();
     this.setSize();
-    this.interiorCamera?.resizeCamera(); // Ensure interior camera resizes as well
+    this.interiorCamera?.resizeCamera(); 
   }
 
   private onAnimationComplete() {
@@ -181,8 +181,11 @@ export class ThreeJSComponent {
   public playAnimation(animationName: string) {
     if (this.animationManager) {
       this.animationManager.setAnimationCompleteCallback(() => {
-        if (animationName === "All_Doors_Opening") {
-          this.playAnimation("All_doors_closing");
+        if (animationName === 'All_Doors_Opening') {
+          this.isDoorOpen = true; // Update isDoorOpen to true when opening
+          this.playAnimation('All_doors_closing');
+        } else if (animationName === 'All_doors_closing') {
+          this.isDoorOpen = false; // Update isDoorOpen to false when closing
         }
       });
       this.animationManager.playAnimation(animationName);
@@ -228,8 +231,7 @@ export class ThreeJSComponent {
     if (!this.animationManager) {
       console.error('AnimationManager is not initialized.');
       return;
-    }
-  
+    }  
     this.animationManager.model.traverse((child) => {
       if (child instanceof THREE.Mesh) {
         const materials = Array.isArray(child.material) ? child.material : [child.material];
@@ -241,6 +243,27 @@ export class ThreeJSComponent {
         });
       }
     });
+  }
+
+  public getCurrentCarColor(): string | null {
+    let currentColor: string | null = null;
+  
+    this.animationManager?.model.traverse((child) => {
+      if (child instanceof THREE.Mesh) {
+        const materials = Array.isArray(child.material) ? child.material : [child.material];
+        materials.forEach((material: THREE.Material) => {
+          if (material.name === 'Car_paint_Original') {
+            currentColor = (material as THREE.MeshPhysicalMaterial).color.getHexString(); // or getStyle(), depending on how you store color
+          }
+        });
+      }
+    });
+  
+    return currentColor;
+  }
+
+  public getCurrentIsDoorStatus(): boolean {
+    return this.isDoorOpen;
   }
   
   

@@ -35,6 +35,7 @@
     "axios": "^1.5.1",
     "dat.gui": "^0.7.9",
     "dotenv": "^16.3.1",
+    "gsap": "^3.12.5",
     "mini-css-extract-plugin": "^2.7.6",
     "three": "^0.158.0",
     "uuid": "^9.0.1"

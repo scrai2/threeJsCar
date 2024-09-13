@@ -8,7 +8,7 @@ import { $id, $query } from "../../utils/dom";
 import "../../scss/main.scss";
 import { ChatService } from "../../services/chat";
 import pubsub from "../../shared/pubsub";
-// import { attachChatIntentEvents } from "../chat-intent/chatIntent";
+import { attachChatIntentEvents } from "../chat-intent/chatIntent";
 import chatIconSvg from "../../assests/icons/icons.svg";
 import { $cameraQuery } from "../../entity-models/camera";
 
@@ -25,7 +25,7 @@ export const loadChat = (container: string) => {
     attachChatSubmitEvent();
     attachVoiceInputEvent();
     pubsub.subscribe(PUBSUB_CONSTANTS.CHAT_QUERY_RESOLVED, (chat: IQuesAns) => {
-      // localStorage.setChat(chat);
+      localStorage.setChat(chat);
       const chatListContainer = $query(".chat-list-container");
       const chatList = $query(".chat-list");
       if (chatList && chatListContainer) {
@@ -206,7 +206,7 @@ export const chatSubmitHandler = async (
         query: queryText,
         role: "user",
       });
-      // await attachChatIntentEvents(queryText, response);
+      await attachChatIntentEvents(queryText, response);
     } catch (err: any) {
       console.log(err);
     } finally {
