@@ -4,6 +4,7 @@ import { loadModel } from './loadModel';
 import { AnimationManager } from '../entity-models/customAnimation';
 import { createLights } from './light';
 import { InteriorCamera } from './interiorCamera';
+import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader';
 
 export class ThreeJSComponent {
   private scene: THREE.Scene;
@@ -26,7 +27,7 @@ export class ThreeJSComponent {
   constructor(canvasId: string) {
     this.canvas = document.getElementById(canvasId) as HTMLCanvasElement;
     if (!this.canvas) throw new Error(`Canvas element with id ${canvasId} not found`);
-    
+
 
     this.scene = new THREE.Scene();
     this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, antialias: true });
@@ -56,9 +57,21 @@ export class ThreeJSComponent {
     this.controls.maxDistance = 20;
     this.controls.screenSpacePanning = false;
 
-    this.addLighting();
-    this.addFloor();
-    createLights(this.scene);
+    // this.addLighting();
+    // createLights(this.scene);
+    
+
+    const pmremGenerator = new THREE.PMREMGenerator(this.renderer);
+    pmremGenerator.compileEquirectangularShader();
+
+    const rgbeLoader = new RGBELoader();
+    rgbeLoader.load('images/backtest.hdr', (texture) => {
+      const envMap = pmremGenerator.fromEquirectangular(texture).texture;
+      this.scene.environment = envMap;
+      this.scene.background = envMap;
+      texture.dispose();
+      pmremGenerator.dispose();
+    });
 
 
 
@@ -84,8 +97,8 @@ export class ThreeJSComponent {
     spotLight.shadow.mapSize.height = 2048;
     spotLight.shadow.camera.near = 10;
     spotLight.shadow.camera.far = 100;
-    this.scene.add(spotLight);
-    this.scene.add(spotLight.target);
+    // this.scene.add(spotLight);
+    // this.scene.add(spotLight.target);
   }
 
   private addFloor() {
@@ -114,33 +127,33 @@ export class ThreeJSComponent {
 
   private animate() {
     requestAnimationFrame(this.animate.bind(this));
-  
+
     const deltaTime = 0.10;
     this.animationManager?.update(deltaTime);
-  
+
     this.handleCameraMovement(deltaTime);
-  
+
     this.renderer.setViewport(0, 0, window.innerWidth * 0.25, window.innerHeight);
     this.renderer.setScissor(0, 0, window.innerWidth * 0.25, window.innerHeight);
     this.renderer.setScissorTest(true);
     this.renderer.setClearColor('#020202');
     this.renderer.clear();
-  
+
     this.renderer.setViewport(window.innerWidth * 0.25, 0, window.innerWidth * 0.75, window.innerHeight);
     this.renderer.setScissor(window.innerWidth * 0.25, 0, window.innerWidth * 0.75, window.innerHeight);
     this.renderer.setScissorTest(true);
     this.renderer.setClearColor('#020202');
     this.renderer.clear();
-  
+
     if (this.currentCamera === 'interior' && this.interiorCamera) {
       this.renderer.render(this.scene, this.interiorCamera.camera);
-      
+
     } else {
       this.controls.update();
       this.renderer.render(this.scene, this.camera);
     }
   }
-  
+
 
   private handleCameraMovement(deltaTime: number) {
     const moveSpeed = 1 * deltaTime;
@@ -171,7 +184,7 @@ export class ThreeJSComponent {
     this.camera.aspect = (window.innerWidth * 0.75) / window.innerHeight;
     this.camera.updateProjectionMatrix();
     this.setSize();
-    this.interiorCamera?.resizeCamera(); 
+    this.interiorCamera?.resizeCamera();
   }
 
   private onAnimationComplete() {
@@ -182,10 +195,10 @@ export class ThreeJSComponent {
     if (this.animationManager) {
       this.animationManager.setAnimationCompleteCallback(() => {
         if (animationName === 'All_Doors_Opening') {
-          this.isDoorOpen = true; // Update isDoorOpen to true when opening
+          this.isDoorOpen = true;
           this.playAnimation('All_doors_closing');
         } else if (animationName === 'All_doors_closing') {
-          this.isDoorOpen = false; // Update isDoorOpen to false when closing
+          this.isDoorOpen = false;
         }
       });
       this.animationManager.playAnimation(animationName);
@@ -208,18 +221,18 @@ export class ThreeJSComponent {
   public switchToInteriorCamera() {
     this.currentCamera = 'interior';
     if (this.interiorCamera) {
-      this.interiorCamera.resetCamera(); 
-      this.controls.enabled = false; 
-      this.renderer.render(this.scene, this.interiorCamera.camera); 
+      this.interiorCamera.resetCamera();
+      this.controls.enabled = false;
+      this.renderer.render(this.scene, this.interiorCamera.camera);
     }
   }
-  
+
   public switchToExteriorCamera() {
     this.currentCamera = 'exterior';
     if (this.controls) {
-      this.controls.enabled = true; 
+      this.controls.enabled = true;
     }
-    this.renderer.render(this.scene, this.camera); 
+    this.renderer.render(this.scene, this.camera);
   }
 
   public updateColor(colorCode: string) {
@@ -231,7 +244,7 @@ export class ThreeJSComponent {
     if (!this.animationManager) {
       console.error('AnimationManager is not initialized.');
       return;
-    }  
+    }
     this.animationManager.model.traverse((child) => {
       if (child instanceof THREE.Mesh) {
         const materials = Array.isArray(child.material) ? child.material : [child.material];
@@ -247,7 +260,7 @@ export class ThreeJSComponent {
 
   public getCurrentCarColor(): string | null {
     let currentColor: string | null = null;
-  
+
     this.animationManager?.model.traverse((child) => {
       if (child instanceof THREE.Mesh) {
         const materials = Array.isArray(child.material) ? child.material : [child.material];
@@ -258,13 +271,18 @@ export class ThreeJSComponent {
         });
       }
     });
-  
+
     return currentColor;
   }
 
   public getCurrentIsDoorStatus(): boolean {
     return this.isDoorOpen;
   }
-  
-  
+
+
+
+
+
+
+
 }

@@ -14,6 +14,14 @@ function createLights(scene: THREE.Scene): { ambientLight: THREE.AmbientLight; d
   directionalLight.castShadow = true;
   directionalLight.shadow.mapSize.width = 1024;
   directionalLight.shadow.mapSize.height = 1024;
+  directionalLight.shadow.mapSize.width = 2048; // Shadow resolution
+directionalLight.shadow.mapSize.height = 2048;
+directionalLight.shadow.camera.near = 0.5; // Start distance of shadow
+directionalLight.shadow.camera.far = 50;   // End distance of shadow
+directionalLight.shadow.camera.left = -10;
+directionalLight.shadow.camera.right = 10;
+directionalLight.shadow.camera.top = 10;
+directionalLight.shadow.camera.bottom = -10;
 
   const lightTarget = new THREE.Object3D();
   lightTarget.position.set(6, -0.5, -17);

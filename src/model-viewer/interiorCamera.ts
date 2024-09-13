@@ -20,13 +20,13 @@ export class InteriorCamera {
     this.scene = scene;
 
     this.camera = new THREE.PerspectiveCamera(
-      85,
+      95,
       (window.innerWidth * 0.75) / window.innerHeight,
       0.01,
       100
     );
 
-    this.position = new THREE.Vector3(0, -0.33, 0);
+    this.position = new THREE.Vector3(-0.1, -0.29, 0);
     this.target = new THREE.Vector3(-5, -0.3, 0);
 
     this.camera.position.copy(this.position);
