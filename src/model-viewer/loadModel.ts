@@ -25,7 +25,14 @@ export function loadModel(
           console.log("No animations found.");
         }
 
-        updateChromeMaterial(model);
+        updateChromeMaterial(model, {
+          color: "#C0C0C0", 
+          envMapIntensity: 2.5, 
+          metalness: 1,
+          roughness: 0.1,
+          clearcoat: 2.5,
+          specularIntensity: 1.5,
+        });
 
         resolve({ model, animations: gltf.animations });
       },
@@ -48,7 +55,19 @@ function centerAndScale(
   model.scale.copy(scale);
 }
 
-function updateChromeMaterial(model: THREE.Group): void {
+interface ChromeMaterialOptions {
+  color?: string;
+  envMapIntensity?: number;
+  metalness?: number;
+  roughness?: number;
+  clearcoat?: number;
+  specularIntensity?: number;
+}
+
+function updateChromeMaterial(
+  model: THREE.Group,
+  options: ChromeMaterialOptions = {}
+): void {
   const chromedMaterialNames = ["Chrome", "Grill_chrom", "Front_Grill_01", "chrome_leg", "back_chrom"];
   const envMap = loadCubeTexture();
 
@@ -59,14 +78,14 @@ function updateChromeMaterial(model: THREE.Group): void {
       if (chromedMaterialNames.includes(child.material.name)) {
         const newMaterial = new THREE.MeshPhysicalMaterial({
           name: child.material.name,
-          color: "#F5F5F8",
+          color: options.color || "#F5F5F8",
           map: child.material.map,
           envMap: envMap,
-          envMapIntensity: 2,
-          metalness: 1,
-          roughness: 0.15,
-          clearcoat: 3,
-          specularIntensity: 3,
+          envMapIntensity: options.envMapIntensity || 2,
+          metalness: options.metalness || 1,
+          roughness: options.roughness || 0.15,
+          clearcoat: options.clearcoat || 3,
+          specularIntensity: options.specularIntensity || 3,
         });
 
         child.material = newMaterial;
@@ -75,7 +94,6 @@ function updateChromeMaterial(model: THREE.Group): void {
     }
   });
 }
-
 
 function loadCubeTexture(): THREE.CubeTexture {
   return new THREE.CubeTextureLoader()
