@@ -57,7 +57,7 @@ module.exports = {
       patterns: [
         { from: "src/index.html", to: "index.html" },
         { from: "images", to: "images" },
-        { from: "models", to: "models" }, 
+        // { from: "models", to: "models" }, 
       ],
     }),
     new Dotenv(),
