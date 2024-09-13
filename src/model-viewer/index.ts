@@ -101,7 +101,7 @@ export class ThreeJSComponent {
   }
 
   private loadCarModel() {
-    loadModel(this.scene, '../models/new/Ford_f150.gltf')
+    loadModel(this.scene, 'https://d7to0drpifvba.cloudfront.net/3d-models/f-150/Ford_f150.gltf')
       .then(({ model, animations }) => {
         this.animationManager = new AnimationManager(model);
         this.animationManager.loadAnimations(animations);
