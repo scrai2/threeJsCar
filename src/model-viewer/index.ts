@@ -24,7 +24,7 @@ export class ThreeJSComponent {
 
   private envMap: THREE.Texture | null = null;
   private envMapIntensity = 1.0;
-  private envMapRotation = 0; // Store rotation angle
+  private envMapRotation = 0; 
   private pmremGenerator: THREE.PMREMGenerator;
   private envMapGroup: THREE.Group;
 
@@ -58,7 +58,7 @@ export class ThreeJSComponent {
     );
     this.camera.position.set(0, 5, 15);
     this.interiorCamera = new InteriorCamera(this.canvas, this.scene);
-    this.pmremGenerator = new THREE.PMREMGenerator(this.renderer); // Initialize here
+    this.pmremGenerator = new THREE.PMREMGenerator(this.renderer); 
     this.pmremGenerator.compileEquirectangularShader();
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
@@ -76,6 +76,9 @@ export class ThreeJSComponent {
     this.scene.add(this.envMapGroup);
     this.loadHDRI();
     this.addGUI();
+    createLights(this.scene);
+
+
 
 
     window.addEventListener('resize', this.onWindowResize.bind(this));
@@ -96,7 +99,7 @@ export class ThreeJSComponent {
     const rgbeLoader = new RGBELoader();
     rgbeLoader.load('images/backtest.hdr', (texture) => {
       this.envMap = this.pmremGenerator.fromEquirectangular(texture).texture;
-      this.envMapGroup.rotation.set(0, this.envMapRotation, 0); // Apply rotation
+      this.envMapGroup.rotation.set(0, this.envMapRotation, 0); 
 
       this.scene.environment = this.envMap;
       this.scene.background = this.envMap;
@@ -104,7 +107,7 @@ export class ThreeJSComponent {
       texture.dispose();
       this.pmremGenerator.dispose();
 
-      this.updateEnvMapIntensity(); // Apply initial intensity
+      this.updateEnvMapIntensity(); 
     });
   }
 
@@ -164,7 +167,7 @@ export class ThreeJSComponent {
 
   private updateRendererExposure(exposure: number): void {
     this.renderer.toneMappingExposure = exposure;
-    this.renderer.render(this.scene, this.camera); // Re-render the scene with updated exposure
+    this.renderer.render(this.scene, this.camera); 
   }
 
   private updateToneMapping(toneMapping: string): void {
@@ -184,21 +187,21 @@ export class ThreeJSComponent {
       default:
         this.renderer.toneMapping = THREE.LinearToneMapping;
     }
-    this.renderer.render(this.scene, this.camera); // Re-render the scene with updated tone mapping
+    this.renderer.render(this.scene, this.camera); 
   }
 
 
 
   private updateHDRILightingIntensity(intensity: number): void {
     if (this.envMap) {
-      this.scene.environment = this.envMap; // Re-apply the environment map
-      this.scene.background = this.envMap;  // Also set the background if desired
+      this.scene.environment = this.envMap; 
+      this.scene.background = this.envMap;  
 
       this.scene.traverse((child) => {
         if (child instanceof THREE.Mesh) {
           const material = child.material as THREE.MeshStandardMaterial;
           if (material.envMap) {
-            material.envMapIntensity = intensity; // Update the intensity
+            material.envMapIntensity = intensity; 
           }
         }
       });
@@ -217,19 +220,17 @@ export class ThreeJSComponent {
     spotLight.shadow.mapSize.height = 2048;
     spotLight.shadow.camera.near = 10;
     spotLight.shadow.camera.far = 100;
-    // this.scene.add(spotLight);
-    // this.scene.add(spotLight.target);
   }
 
   private addFloor(): void {
     const loader = new GLTFLoader();
-    const floorPath = 'models/Ford_Base.gltf'; // Path to your GLTF file
+    const floorPath = 'models/Ford_Base.gltf'; 
   
     loader.load(floorPath, (gltf) => {
       const floor = gltf.scene;
   
-      floor.scale.set(1, 1, 1); // Adjust scale if needed
-      floor.position.set(0, -1.8, 0); // Set the position
+      floor.scale.set(1, 1, 1); 
+      floor.position.set(0, -1.500, 0); 
       floor.rotation.set(0, 0 , 0);
   
       floor.traverse((child) => {
@@ -267,7 +268,6 @@ export class ThreeJSComponent {
 
     this.renderer.setViewport(0, 0, window.innerWidth, window.innerHeight);
     this.renderer.setScissor(0, 0, window.innerWidth, window.innerHeight);
-    // this.renderer.setScissorTest(true);
     this.renderer.setClearColor('#020202');
     this.renderer.clear();
 
@@ -306,7 +306,7 @@ export class ThreeJSComponent {
   }
 
   private onWindowResize() {
-    this.camera.aspect = (window.innerWidth * 0.75) / window.innerHeight;
+    this.camera.aspect = (window.innerWidth ) / window.innerHeight;
     this.camera.updateProjectionMatrix();
     this.setSize();
     this.interiorCamera?.resizeCamera();
