@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
 
 export function loadModel(
   scene: THREE.Scene, 
@@ -17,6 +18,14 @@ export function loadModel(
       (gltf) => {
         const model = gltf.scene;
         centerAndScale(model, position, rotation, scale);
+        model.traverse((child) => {
+          if (child instanceof THREE.Mesh) {
+            child.castShadow = true; // Ensure the model casts shadows
+            child.receiveShadow = true; // Ensure the model can receive shadows (if needed)
+          }
+        });
+        
+
         scene.add(model);
 
         if (gltf.animations.length > 0) {
