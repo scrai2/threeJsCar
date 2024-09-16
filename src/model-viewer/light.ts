@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import * as dat from 'dat.gui';
 
-function createLights(scene: THREE.Scene): { ambientLight: THREE.AmbientLight; directionalLight: THREE.DirectionalLight; gui: dat.GUI } {
+function createLights(scene: THREE.Scene): { ambientLight: THREE.AmbientLight; directionalLight: THREE.DirectionalLight } {
   const lightGroup = new THREE.Group();
   
   // Ambient Light
@@ -34,23 +34,23 @@ directionalLight.shadow.camera.bottom = -10;
   scene.add(lightGroup);
 
   // Create GUI
-  const gui = new dat.GUI();
+  // const gui = new dat.GUI();
 
   // GUI Controls for Ambient Light
-  const ambientLightFolder = gui.addFolder('Ambient Light');
-  ambientLightFolder.add(ambientLight, 'intensity', 0, 10).name('Intensity');
+  // const ambientLightFolder = gui.addFolder('Ambient Light');
+  // ambientLightFolder.add(ambientLight, 'intensity', 0, 10).name('Intensity');
   
   // GUI Controls for Directional Light
-  const directionalLightFolder = gui.addFolder('Directional Light');
-  directionalLightFolder.add(directionalLight, 'intensity', 0, 10).name('Intensity');
-  directionalLightFolder.add(directionalLight.position, 'x', -100, 100).name('Position X');
-  directionalLightFolder.add(directionalLight.position, 'y', -100, 100).name('Position Y');
-  directionalLightFolder.add(directionalLight.position, 'z', -100, 100).name('Position Z');
-  directionalLightFolder.add(lightTarget.position, 'x', -100, 100).name('Target X');
-  directionalLightFolder.add(lightTarget.position, 'y', -100, 100).name('Target Y');
-  directionalLightFolder.add(lightTarget.position, 'z', -100, 100).name('Target Z');
+  // const directionalLightFolder = gui.addFolder('Directional Light');
+  // directionalLightFolder.add(directionalLight, 'intensity', 0, 10).name('Intensity');
+  // directionalLightFolder.add(directionalLight.position, 'x', -100, 100).name('Position X');
+  // directionalLightFolder.add(directionalLight.position, 'y', -100, 100).name('Position Y');
+  // directionalLightFolder.add(directionalLight.position, 'z', -100, 100).name('Position Z');
+  // directionalLightFolder.add(lightTarget.position, 'x', -100, 100).name('Target X');
+  // directionalLightFolder.add(lightTarget.position, 'y', -100, 100).name('Target Y');
+  // directionalLightFolder.add(lightTarget.position, 'z', -100, 100).name('Target Z');
 
-  return { ambientLight, directionalLight, gui };
+  return { ambientLight, directionalLight };
 }
 
 export { createLights };
