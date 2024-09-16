@@ -6,6 +6,7 @@ import { createLights } from './light';
 import { InteriorCamera } from './interiorCamera';
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader';
 import { GUI } from 'dat.gui';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 
 export class ThreeJSComponent {
   private scene: THREE.Scene;
@@ -75,8 +76,6 @@ export class ThreeJSComponent {
     this.scene.add(this.envMapGroup);
     this.loadHDRI();
     this.addGUI();
-    this.addMaterialGUI();
-    this.addGlassMaterialGUI();
 
 
     window.addEventListener('resize', this.onWindowResize.bind(this));
@@ -84,6 +83,7 @@ export class ThreeJSComponent {
     window.addEventListener('keyup', this.onKeyUp.bind(this));
 
     this.loadCarModel();
+    this.addFloor();
     this.animate();
   }
 
@@ -162,166 +162,6 @@ export class ThreeJSComponent {
     gui.domElement.style.right = '10px';
   }
 
-  private addMaterialGUI(): void {
-    const gui = new GUI();
-    const materialControls = {
-      'Material Type': this.materialType,
-      'Color': '#ffffff',
-      'Roughness': 0.5,
-      'Metalness': 0.5
-    };
-
-    gui.add(materialControls, 'Material Type', ['MeshBasicMaterial', 'MeshStandardMaterial', 'MeshPhysicalMaterial'])
-      .onChange((type: string) => {
-        this.materialType = type;
-        this.updateMaterialType(type);
-      });
-
-    gui.addColor(materialControls, 'Color').onChange((color: string) => {
-      this.updateMaterialProperties('color', color);
-    });
-
-    gui.add(materialControls, 'Roughness', 0, 1, 0.01).onChange((value: number) => {
-      this.updateMaterialProperties('roughness', value);
-    });
-
-    gui.add(materialControls, 'Metalness', 0, 1, 0.01).onChange((value: number) => {
-      this.updateMaterialProperties('metalness', value);
-    });
-
-    gui.domElement.style.position = 'absolute';
-    gui.domElement.style.top = '500px';
-    gui.domElement.style.right = '10px';
-
-    this.materialGuiControls = materialControls;
-  }
-
-  private updateMaterialType(type: string): void {
-    if (!this.animationManager) return;
-
-    this.animationManager.model.traverse((child) => {
-      if (child instanceof THREE.Mesh) {
-        const materials = Array.isArray(child.material) ? child.material : [child.material];
-        materials.forEach((material: THREE.Material) => {
-          if (material.name === 'Car_paint_Original') {
-            let newMaterial: THREE.Material;
-
-            switch (type) {
-              case 'MeshBasicMaterial':
-                newMaterial = new THREE.MeshBasicMaterial();
-                break;
-              case 'MeshStandardMaterial':
-                newMaterial = new THREE.MeshStandardMaterial();
-                break;
-              case 'MeshPhysicalMaterial':
-                newMaterial = new THREE.MeshPhysicalMaterial();
-                break;
-              default:
-                newMaterial = new THREE.MeshPhysicalMaterial();
-            }
-
-            newMaterial.name = 'Car_paint_Original';
-            child.material = newMaterial;
-          }
-        });
-      }
-    });
-
-    this.updateMaterialProperties('color', this.materialGuiControls['Color']);
-    this.updateMaterialProperties('roughness', this.materialGuiControls['Roughness']);
-    this.updateMaterialProperties('metalness', this.materialGuiControls['Metalness']);
-  }
-
-  private updateMaterialProperties(property: string, value: any): void {
-    if (!this.animationManager) return;
-
-    this.animationManager.model.traverse((child) => {
-      if (child instanceof THREE.Mesh) {
-        const materials = Array.isArray(child.material) ? child.material : [child.material];
-        materials.forEach((material: THREE.Material) => {
-          if (material.name === 'Car_paint_Original') {
-            const mat = material as THREE.MeshStandardMaterial | THREE.MeshPhysicalMaterial;
-            if (property === 'color' && mat instanceof THREE.MeshStandardMaterial || mat instanceof THREE.MeshPhysicalMaterial) {
-              mat.color.set(value);
-            }
-            if (property === 'roughness' && mat instanceof THREE.MeshStandardMaterial || mat instanceof THREE.MeshPhysicalMaterial) {
-              mat.roughness = value;
-            }
-            if (property === 'metalness' && mat instanceof THREE.MeshStandardMaterial || mat instanceof THREE.MeshPhysicalMaterial) {
-              mat.metalness = value;
-            }
-          }
-        });
-      }
-    });
-  }
-
-  private addGlassMaterialGUI(): void {
-    const gui = new GUI();
-    const glassControls = {
-      'Color': '#ffffff',
-      'Transparency': 0.5,
-      'Reflectivity': 0.5,
-      'Refraction': 1.5
-    };
-
-    gui.addColor(glassControls, 'Color').onChange((color: string) => {
-      this.updateGlassMaterialProperties('color', color);
-    });
-
-    gui.add(glassControls, 'Transparency', 0, 1, 0.01).onChange((value: number) => {
-      this.updateGlassMaterialProperties('transparency', value);
-    });
-
-    gui.add(glassControls, 'Reflectivity', 0, 1, 0.01).onChange((value: number) => {
-      this.updateGlassMaterialProperties('reflectivity', value);
-    });
-
-    gui.add(glassControls, 'Refraction', 1, 2, 0.01).onChange((value: number) => {
-      this.updateGlassMaterialProperties('refraction', value);
-    });
-
-    gui.domElement.style.position = 'absolute';
-    gui.domElement.style.top = '10px';
-    gui.domElement.style.left = '200px';
-
-    this.glassGuiControls = glassControls;
-  }
-
-  private updateGlassMaterialProperties(property: string, value: any): void {
-    if (!this.animationManager) return;
-
-    this.animationManager.model.traverse((child) => {
-      if (child instanceof THREE.Mesh) {
-        const materials = Array.isArray(child.material) ? child.material : [child.material];
-        materials.forEach((material: THREE.Material) => {
-          if (material.name === this.glassMaterialName) {
-            const mat = material as THREE.MeshPhysicalMaterial; // Use MeshPhysicalMaterial for glass
-
-            if (property === 'color') {
-              mat.color.set(value);
-            }
-            if (property === 'transparency') {
-              mat.transmission = value; // Glass-like transparency
-              mat.opacity = value;
-              mat.transparent = value < 1;
-            }
-            if (property === 'reflectivity') {
-              mat.roughness = 1 - value; // Inverse of reflectivity for simplicity
-            }
-            if (property === 'refraction') {
-              mat.ior = value; // Index of refraction
-            }
-          }
-        });
-      }
-    });
-  }
-
-
-
-
-
   private updateRendererExposure(exposure: number): void {
     this.renderer.toneMappingExposure = exposure;
     this.renderer.render(this.scene, this.camera); // Re-render the scene with updated exposure
@@ -381,17 +221,29 @@ export class ThreeJSComponent {
     // this.scene.add(spotLight.target);
   }
 
-  private addFloor() {
-    const textureLoader = new THREE.TextureLoader();
-    const texture = textureLoader.load('images/floor.jpg');
-    const floorGeometry = new THREE.PlaneGeometry(50, 50);
-    const floorMaterial = new THREE.MeshStandardMaterial({ map: texture });
-    const floor = new THREE.Mesh(floorGeometry, floorMaterial);
-    floor.receiveShadow = true;
-    floor.rotation.x = -Math.PI / 2;
-    floor.position.set(0, -1.8, 0);
-    this.scene.add(floor);
+  private addFloor(): void {
+    const loader = new GLTFLoader();
+    const floorPath = 'models/Ford_Base.gltf'; // Path to your GLTF file
+  
+    loader.load(floorPath, (gltf) => {
+      const floor = gltf.scene;
+  
+      floor.scale.set(1, 1, 1); // Adjust scale if needed
+      floor.position.set(0, -1.8, 0); // Set the position
+      floor.rotation.set(0, 0 , 0);
+  
+      floor.traverse((child) => {
+        if (child instanceof THREE.Mesh) {
+          child.receiveShadow = true;
+        }
+      });
+  
+      this.scene.add(floor);
+    }, undefined, (error) => {
+      console.error('An error occurred while loading the GLTF model:', error);
+    });
   }
+  
 
   private loadCarModel() {
     loadModel(this.scene, 'https://d7to0drpifvba.cloudfront.net/3d-models/f-150/Ford_f150.gltf')
