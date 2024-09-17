@@ -36,6 +36,7 @@ export class InteriorCamera {
     this.updateCamera();
 
     this.gui = new dat.GUI();
+    this.addGUIControls();
 
     this.canvas.addEventListener('mousedown', this.onMouseDown.bind(this));
     this.canvas.addEventListener('mousemove', this.onMouseMove.bind(this));
@@ -68,7 +69,6 @@ export class InteriorCamera {
 
   private updateCamera() {
     this.currentTarget.lerp(this.desiredTarget, this.dampingFactor);
-
     this.camera.lookAt(this.currentTarget);
   }
 
@@ -112,5 +112,28 @@ export class InteriorCamera {
 
   public resetCamera() {
     this.setCameraPosition(this.position, this.target);
+  }
+
+  private addGUIControls() {
+    const cameraFolder = this.gui.addFolder('Camera Properties');
+
+    cameraFolder.add(this.camera, 'fov', 1, 150, 1).onChange(() => {
+      this.camera.updateProjectionMatrix(); // Update projection after changing FOV
+    });
+
+    cameraFolder.add(this.camera, 'near', 0.01, 10, 0.01).onChange(() => {
+      this.camera.updateProjectionMatrix(); // Update projection after changing near plane
+    });
+
+    cameraFolder.add(this.camera, 'far', 10, 1000, 1).onChange(() => {
+      this.camera.updateProjectionMatrix(); // Update projection after changing far plane
+    });
+
+    cameraFolder.add(this.camera, 'aspect', 0.1, 3, 0.01).onChange(() => {
+      this.camera.updateProjectionMatrix(); // Update projection after changing aspect ratio
+    });
+
+
+    cameraFolder.open();
   }
 }

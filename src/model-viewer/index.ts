@@ -99,7 +99,6 @@ export class ThreeJSComponent {
     const rgbeLoader = new RGBELoader();
     rgbeLoader.load('images/backtest.hdr', (texture) => {
       this.envMap = this.pmremGenerator.fromEquirectangular(texture).texture;
-      this.envMapGroup.rotation.set(0, this.envMapRotation, 0); 
 
       this.scene.environment = this.envMap;
       this.scene.background = this.envMap;
@@ -161,7 +160,7 @@ export class ThreeJSComponent {
     });
 
     gui.domElement.style.position = 'absolute';
-    gui.domElement.style.top = '10px';
+    gui.domElement.style.top = '500px';
     gui.domElement.style.right = '10px';
   }
 
@@ -208,20 +207,6 @@ export class ThreeJSComponent {
     }
   }
 
-
-
-
-  private addLighting() {
-    const spotLight = new THREE.SpotLight(0xffffff, 12, 100, 0.344, 0.1, 1);
-    spotLight.position.set(0, 10, 0);
-    spotLight.castShadow = true;
-    spotLight.target.position.set(0, 0, 0);
-    spotLight.shadow.mapSize.width = 2048;
-    spotLight.shadow.mapSize.height = 2048;
-    spotLight.shadow.camera.near = 10;
-    spotLight.shadow.camera.far = 100;
-  }
-
   private addFloor(): void {
     const loader = new GLTFLoader();
     const floorPath = 'models/Ford_Base.gltf'; 
@@ -238,7 +223,7 @@ export class ThreeJSComponent {
           child.receiveShadow = true;
         }
       });
-  
+      console.log("floor", floor)
       this.scene.add(floor);
     }, undefined, (error) => {
       console.error('An error occurred while loading the GLTF model:', error);
@@ -247,7 +232,7 @@ export class ThreeJSComponent {
   
 
   private loadCarModel() {
-    loadModel(this.scene, 'https://d7to0drpifvba.cloudfront.net/3d-models/f-150/Ford_f150.gltf')
+    loadModel(this.scene, 'models/car/Ford_F150.gltf')
       .then(({ model, animations }) => {
         this.animationManager = new AnimationManager(model);
         this.animationManager.loadAnimations(animations);
