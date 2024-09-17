@@ -209,7 +209,7 @@ export class ThreeJSComponent {
 
   private addFloor(): void {
     const loader = new GLTFLoader();
-    const floorPath = 'models/Ford_Base.gltf'; 
+    const floorPath = 'https://d7to0drpifvba.cloudfront.net/3d-models/f-150/base/Ford_BG.gltf'; 
   
     loader.load(floorPath, (gltf) => {
       const floor = gltf.scene;
@@ -232,7 +232,7 @@ export class ThreeJSComponent {
   
 
   private loadCarModel() {
-    loadModel(this.scene, 'models/car/Ford_F150.gltf')
+    loadModel(this.scene, 'https://d7to0drpifvba.cloudfront.net/3d-models/f-150/Ford_F150.gltf')
       .then(({ model, animations }) => {
         this.animationManager = new AnimationManager(model);
         this.animationManager.loadAnimations(animations);
