@@ -10,7 +10,7 @@ export class InteriorCamera {
   private isDragging: boolean = false;
   private prevMousePosition: { x: number, y: number } = { x: 0, y: 0 };
   private gui: dat.GUI;
-  private rotationSpeed: number = 0.005;
+  private rotationSpeed: number = 0.05;
   private dampingFactor: number = 0.1;
   private currentTarget: THREE.Vector3;
   private desiredTarget: THREE.Vector3;
@@ -26,7 +26,7 @@ export class InteriorCamera {
       100
     );
 
-    this.position = new THREE.Vector3(-0.1, -0.29, 0);
+    this.position = new THREE.Vector3(-0.2, -0.29, 0);
     this.target = new THREE.Vector3(-5, -0.3, 0);
 
     this.camera.position.copy(this.position);
@@ -79,28 +79,53 @@ export class InteriorCamera {
 
   private onMouseMove(event: MouseEvent) {
     if (!this.isDragging) return;
-
+  
+    // Calculate mouse movement deltas
     const deltaX = event.clientX - this.prevMousePosition.x;
     const deltaY = event.clientY - this.prevMousePosition.y;
-
+  
     this.prevMousePosition = { x: event.clientX, y: event.clientY };
-
+  
     const rotationSpeed = this.rotationSpeed;
-
-    const rotationQuat = new THREE.Quaternion();
-    rotationQuat.setFromEuler(new THREE.Euler(
-      deltaY * rotationSpeed,
-      deltaX * rotationSpeed,
-      0,
-      'XYZ'
-    ));
-
+  
+    // Get the current direction vector from the camera to the target
     const direction = new THREE.Vector3().subVectors(this.desiredTarget, this.position).normalize();
-    direction.applyQuaternion(rotationQuat);
-
+  
+    // Prioritize the axis with the largest movement (either vertical or horizontal)
+    if (Math.abs(deltaY) > Math.abs(deltaX)) {
+      // Vertical Rotation (X-axis) - Only rotate vertically if deltaY is greater than deltaX
+  
+      // Calculate the new vertical angle (pitch)
+      let newY = direction.y - deltaY * rotationSpeed;
+  
+      // Clamp vertical rotation between y = -1 (looking fully down) and y = 1 (looking fully up)
+      newY = THREE.MathUtils.clamp(newY, -1, 1);
+  
+      // Update the direction's Y component after clamping the vertical rotation
+      direction.y = newY;
+      
+    } else {
+      // Horizontal Rotation (Y-axis) - Only rotate horizontally if deltaX is greater than deltaY
+  
+      // Calculate the horizontal angle (yaw)
+      let horizontalAngle = Math.atan2(direction.x, direction.z);
+      horizontalAngle -= deltaX * rotationSpeed; // Rotate based on horizontal mouse movement
+  
+      // Update direction vector after horizontal rotation
+      direction.x = Math.sin(horizontalAngle);
+      direction.z = Math.cos(horizontalAngle);
+    }
+  
+    // Normalize the direction vector to maintain unit length
+    direction.normalize();
+  
+    // Set the desired target position based on the updated direction
     this.desiredTarget.copy(this.position.clone().add(direction));
   }
-
+  
+  
+  
+  
   private onMouseUp() {
     this.isDragging = false;
   }
