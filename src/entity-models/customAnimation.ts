@@ -49,8 +49,8 @@ export class AnimationManager {
         if (this.onAnimationComplete) {
           this.onAnimationComplete();
         }
-        this.currentAction.stop(); // Explicitly stop the action
-        this.currentAction = null; // Clear the reference
+        this.currentAction.stop(); 
+        this.currentAction = null; 
       }
     }
   }

@@ -80,7 +80,7 @@ export class ThreeJSComponent {
 
 
 
-
+    
     window.addEventListener('resize', this.onWindowResize.bind(this));
     window.addEventListener('keydown', this.onKeyDown.bind(this));
     window.addEventListener('keyup', this.onKeyUp.bind(this));
@@ -219,16 +219,28 @@ export class ThreeJSComponent {
       floor.rotation.set(0, 0 , 0);
   
       floor.traverse((child) => {
-        if (child instanceof THREE.Mesh) {
+        if (child instanceof THREE.Mesh && child.material) {
+          const material = child.material as THREE.MeshPhysicalMaterial;
+          if (material.name === 'MT_BGBase_Main') {
+            // Modify the material properties as needed
+            material.color.set("#C4C4C4"); // Change color to red
+            material.roughness = 0;     // Adjust roughness
+            material.metalness = 0.8;     // Adjust metalness
+            material.reflectivity = 0.9
+            material.needsUpdate = true;  // Ensure material updates
+          }
+          
           child.receiveShadow = true;
         }
       });
-      console.log("floor", floor)
+  
+      console.log("floor", floor);
       this.scene.add(floor);
     }, undefined, (error) => {
       console.error('An error occurred while loading the GLTF model:', error);
     });
   }
+  
   
 
   private loadCarModel() {

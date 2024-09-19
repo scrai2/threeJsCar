@@ -20,8 +20,8 @@ export function loadModel(
         centerAndScale(model, position, rotation, scale);
         model.traverse((child) => {
           if (child instanceof THREE.Mesh) {
-            child.castShadow = true; // Ensure the model casts shadows
-            child.receiveShadow = true; // Ensure the model can receive shadows (if needed)
+            child.castShadow = true; 
+            child.receiveShadow = true;
           }
         });
         

@@ -20,8 +20,8 @@ export class InteriorCamera {
     this.scene = scene;
 
     this.camera = new THREE.PerspectiveCamera(
-      95,
-      (window.innerWidth * 0.75) / window.innerHeight,
+      75,
+      1.8,
       0.01,
       100
     );
