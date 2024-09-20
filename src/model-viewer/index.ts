@@ -223,10 +223,12 @@ export class ThreeJSComponent {
           const material = child.material as THREE.MeshPhysicalMaterial;
           if (material.name === 'MT_BGBase_Main') {
             // Modify the material properties as needed
-            material.color.set("#C4C4C4"); // Change color to red
+            material.color.set("#FFFFFF"); // Change color to red
             material.roughness = 0;     // Adjust roughness
-            material.metalness = 0.8;     // Adjust metalness
-            material.reflectivity = 0.9
+            material.metalness = 0.3;     // Adjust metalness
+            material.emissiveIntensity = 0.2
+            material.envMapIntensity = 0.020
+
             material.needsUpdate = true;  // Ensure material updates
           }
           
