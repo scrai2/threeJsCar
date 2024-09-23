@@ -222,7 +222,6 @@ export class ThreeJSComponent {
         if (child instanceof THREE.Mesh && child.material) {
           const material = child.material as THREE.MeshPhysicalMaterial;
   
-          
           if (material.name === 'MT_BGBase_Main') {
             material.color.set("#C4C4C4"); 
             material.roughness = 0; 
