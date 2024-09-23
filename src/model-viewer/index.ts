@@ -209,30 +209,34 @@ export class ThreeJSComponent {
 
   private addFloor(): void {
     const loader = new GLTFLoader();
-    const floorPath = 'https://d7to0drpifvba.cloudfront.net/3d-models/f-150/base/Ford_BG.gltf'; 
+    const floorPath = 'https://d7to0drpifvba.cloudfront.net/3d-models/f-150/base/Ford_BG.gltf';
   
     loader.load(floorPath, (gltf) => {
       const floor = gltf.scene;
   
-      floor.scale.set(1, 1, 1); 
-      floor.position.set(0, -1.500, 0); 
-      floor.rotation.set(0, 0 , 0);
+      floor.scale.set(1, 1, 1);
+      floor.position.set(0, -1.500, 0);
+      floor.rotation.set(0, 0, 0);
   
       floor.traverse((child) => {
         if (child instanceof THREE.Mesh && child.material) {
           const material = child.material as THREE.MeshPhysicalMaterial;
-          if (material.name === 'MT_BGBase_Main') {
-            // Modify the material properties as needed
-            material.color.set("#FFFFFF"); // Change color to red
-            material.roughness = 0;     // Adjust roughness
-            material.metalness = 0.3;     // Adjust metalness
-            material.emissiveIntensity = 0.2
-            material.envMapIntensity = 0.020
-
-            material.needsUpdate = true;  // Ensure material updates
-          }
+  
           
-          child.receiveShadow = true;
+          if (material.name === 'MT_BGBase_Main') {
+            material.color.set("#C4C4C4"); 
+            material.roughness = 0; 
+            material.metalness = 0.8; 
+            material.reflectivity = 0.9;
+            material.needsUpdate = true; 
+            child.receiveShadow = true;
+          }
+  
+          if (material.name === 'MT_BGBase_Emission') {
+            material.emissive.set(0x00ff00); 
+            material.emissiveIntensity = 10; 
+            material.needsUpdate = true; 
+          }
         }
       });
   
@@ -242,6 +246,7 @@ export class ThreeJSComponent {
       console.error('An error occurred while loading the GLTF model:', error);
     });
   }
+  
   
   
 
