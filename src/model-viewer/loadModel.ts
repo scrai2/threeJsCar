@@ -24,8 +24,6 @@ export function loadModel(
             child.receiveShadow = true;
           }
         });
-        
-
         scene.add(model);
 
         if (gltf.animations.length > 0) {
