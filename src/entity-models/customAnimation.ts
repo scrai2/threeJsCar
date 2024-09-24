@@ -14,7 +14,7 @@ export class AnimationManager {
     this.animations = animations;
   }
 
-  public playAnimation(animationName: string) {
+  public playAnimation(animationName: string, timeScale: number = 0.5) {
     if (!this.mixer) {
       console.error("Animation mixer is not initialized.");
       return;
@@ -30,6 +30,7 @@ export class AnimationManager {
       action.reset();
       action.setLoop(THREE.LoopOnce, 1);
       action.clampWhenFinished = true;
+      action.setEffectiveTimeScale(timeScale)
       action.play();
     } else {
       console.warn(`Animation ${animationName} not found.`);
