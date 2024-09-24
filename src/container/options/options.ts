@@ -57,14 +57,13 @@ export const initializeSwatches = (
     });
   }
 
-  // Attach click event listeners to the options
   const optionItems = $queryAll(".swatch-category-options-list-item");
   optionItems.forEach((item) => {
     item.addEventListener("click", (event) => {
       const target = event.currentTarget as HTMLElement;
       const optionName = target.getAttribute("data-swatch-name");
       if (optionName) {
-        component.changeCarPaintColor(optionName)
+        component.changeCarPaintColor(optionName);
         console.log(`Option clicked: ${optionName}`);
       }
     });

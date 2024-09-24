@@ -41,6 +41,8 @@ export function loadModel(
           specularIntensity: 1.5,
         });
 
+        toggleAlloyMeshesVisibility(model);
+
         resolve({ model, animations: gltf.animations });
       },
       undefined,
@@ -107,3 +109,20 @@ function loadCubeTexture(): THREE.CubeTexture {
     .setPath("images/")
     .load(["px.jpg", "nx.jpg", "py.jpg", "ny.jpg", "pz.jpg", "nz.jpg"]);
 }
+
+
+function toggleAlloyMeshesVisibility(model: THREE.Group): void {
+  const alloyMeshNames = ["SM-Aloy-Low_01", "SM_Alloy_002", "SM_Alloy_003", "SM_Alloy_004"];
+  const visibleMeshName = "SM-Aloy-Low_01";
+
+  model.traverse((child) => {
+    if (child instanceof THREE.Mesh || child instanceof THREE.Group) {
+      if (alloyMeshNames.includes(child.name)) {
+       
+        child.visible = (child.name === visibleMeshName);
+      }
+    }
+  });
+}
+
+

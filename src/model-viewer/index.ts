@@ -239,7 +239,6 @@ export class ThreeJSComponent {
         }
       });
   
-      console.log("floor", floor);
       this.scene.add(floor);
     }, undefined, (error) => {
       console.error('An error occurred while loading the GLTF model:', error);
@@ -364,7 +363,6 @@ export class ThreeJSComponent {
   }
 
   public updateColor(colorCode: string) {
-    console.log("this and that")
     this.changeCarPaintColor(colorCode);
   }
 
@@ -404,5 +402,21 @@ export class ThreeJSComponent {
 
   public getCurrentIsDoorStatus(): boolean {
     return this.isDoorOpen;
+  }
+
+
+  public toggleAlloyMeshesVisibility(alloyName: string): void {
+    console.log("its Called")
+    const alloyMeshNames = ["SM-Aloy-Low_01", "SM_Alloy_002", "SM_Alloy_003", "SM_Alloy_004"];
+    const visibleMeshName = "SM-Aloy-Low_01";
+  
+    this.animationManager?.model.traverse((child) => {
+      if (child instanceof THREE.Mesh || child instanceof THREE.Group) {
+        if (alloyMeshNames.includes(child.name)) {
+         
+          child.visible = (child.name === alloyName);
+        }
+      }
+    });
   }
 }

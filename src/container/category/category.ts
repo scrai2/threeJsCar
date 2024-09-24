@@ -53,12 +53,12 @@ export const CATEGORIES: ICategory[] = [
         isSelected: true,
         thumbnailPath: `${Icons}#image0_770_18761`,
       },
-      // {
-      //   id: 2806,
-      //   name: "SM_Alloy_02",
-      //   isSelected: false,
-      //   thumbnailPath: `${Icons}#image0_770_18761`,
-      // },
+      {
+        id: 2806,
+        name: "SM_Alloy_02",
+        isSelected: false,
+        thumbnailPath: `${Icons}#image0_770_18761`,
+      },
       {
         id: 2807,
         name: "SM_Alloy_03",
