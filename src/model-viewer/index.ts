@@ -405,16 +405,13 @@ export class ThreeJSComponent {
   }
 
 
-  public toggleAlloyMeshesVisibility(alloyName: string): void {
-    console.log("its Called")
+  public toggleAlloyMeshesVisibility( visibleMeshName: string): void {
     const alloyMeshNames = ["SM-Aloy-Low_01", "SM_Alloy_002", "SM_Alloy_003", "SM_Alloy_004"];
-    const visibleMeshName = "SM-Aloy-Low_01";
   
     this.animationManager?.model.traverse((child) => {
       if (child instanceof THREE.Mesh || child instanceof THREE.Group) {
-        if (alloyMeshNames.includes(child.name)) {
-         
-          child.visible = (child.name === alloyName);
+        if (alloyMeshNames.includes(child.name)) {          
+          child.visible = (child.name === visibleMeshName);
         }
       }
     });

@@ -58,13 +58,22 @@ export const initializeSwatches = (
   }
 
   const optionItems = $queryAll(".swatch-category-options-list-item");
+  const wheelOptions = ["SM-Aloy-Low_01", "SM_Alloy_002", "SM_Alloy_003", "SM_Alloy_004"];
+
   optionItems.forEach((item) => {
     item.addEventListener("click", (event) => {
       const target = event.currentTarget as HTMLElement;
       const optionName = target.getAttribute("data-swatch-name");
+      console.log("clicked on the category optionName", optionName);
       if (optionName) {
-        component.changeCarPaintColor(optionName);
-        console.log(`Option clicked: ${optionName}`);
+        // Check if optionName is in the wheelOptions array
+        if (wheelOptions.includes(optionName)) {
+          component.toggleAlloyMeshesVisibility(optionName); // Change the wheel if the option matches
+          console.log(`Wheel option clicked: ${optionName}`);
+        } else {
+          component.changeCarPaintColor(optionName); // Change the car paint color otherwise
+          console.log(`Car paint color option clicked: ${optionName}`);
+        }
       }
     });
   });
