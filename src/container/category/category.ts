@@ -49,25 +49,25 @@ export const CATEGORIES: ICategory[] = [
     availableOptions: [
       {
         id: 2805,
-        name: "SM_Alloy_01",
+        name: "SM-Aloy-Low_01",
         isSelected: true,
         thumbnailPath: `${Icons}#image0_770_18761`,
       },
       {
         id: 2806,
-        name: "SM_Alloy_02",
+        name: "SM_Alloy_002",
         isSelected: false,
         thumbnailPath: `${Icons}#image0_770_18761`,
       },
       {
         id: 2807,
-        name: "SM_Alloy_03",
+        name: "SM_Alloy_003",
         isSelected: false,
         thumbnailPath: `${Icons}#image0_770_18762`,
       },
       {
         id: 2808,
-        name: "SM_Alloy_04",
+        name: "SM_Alloy_004",
         isSelected: false,
         thumbnailPath: `${Icons}#image0_770_18760`,
       },
