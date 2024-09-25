@@ -32,7 +32,7 @@ export const attachChatIntentEvents = async (
       handleDoorOpenIntent(query, intentResponse);
       break;
     case INTENTS.INTERIOR_SHOW:
-    //   handleExteriorInteriorViewIntent(query, intentResponse);
+      handleExteriorInteriorViewIntent(query, intentResponse);
       break;
     case INTENTS.SHOW_COLOR_OPTIONS_EXT:
     //   handleShowColorOptionsExteriorIntent(query, intentResponse);
@@ -101,33 +101,34 @@ const colorMapping: ColorMapping = {
   red: "#5F0B0B",
 };
 export const handleChangeCarColorIntent = (
-    query: string,
-    intentResponse: IGetActionIntent,
-  ) => {
-    const intentColorName = typeof intentResponse.value === 'string' ? intentResponse.value.toLowerCase() as keyof ColorMapping : null;
-  
-    if (!intentColorName || !colorMapping[intentColorName]) {
-      intentResponse.message = `Currently, the "${intentResponse.value}" option is not available.`;
-    } else {
-      const colorCode = colorMapping[intentColorName];
-  
-      if (globals.threeJSComponent) {
-        const currentCarColor = globals.threeJSComponent.getCurrentCarColor(); // Method to get current car color
-  
-        if (currentCarColor === colorCode) {
-          intentResponse.message = `The car is already in the requested color ${intentColorName}.`;
-        } else {
-          globals.threeJSComponent.changeCarPaintColor(colorCode);
-          intentResponse.message = `The car color has been changed to ${intentColorName}.`;
-        }
+  query: string,
+  intentResponse: IGetActionIntent,
+) => {
+  const intentColorName = typeof intentResponse.value === 'string' ? intentResponse.value.toLowerCase() as keyof ColorMapping : null;
+
+  if (!intentColorName || !colorMapping[intentColorName]) {
+    intentResponse.message = `Currently, the "${intentResponse.value}" option is not available.`;
+  } else {
+    const colorCode = colorMapping[intentColorName];
+
+    if (globals.threeJSComponent) {
+      const currentCarColor = globals.threeJSComponent.getCurrentCarColor(); // Method to get current car color
+
+      if (currentCarColor === colorCode) {
+        intentResponse.message = `The car is already in the requested color ${intentColorName}.`;
       } else {
-        console.error('ThreeJSComponent is not initialized.');
-        intentResponse.message = 'Error: ThreeJSComponent is not available.';
+        globals.threeJSComponent.changeCarPaintColor(colorCode);
+        intentResponse.message = `The car color has been changed to ${intentColorName}.`;
       }
+    } else {
+      console.error('ThreeJSComponent is not initialized.');
+      intentResponse.message = 'Error: ThreeJSComponent is not available.';
     }
-  
-    publishChat(query, intentResponse.message);
-  };
+  }
+
+  publishChat(query, intentResponse.message);
+};
+
 
 const publishChat = (query: string, answer: string) => {
   pubsub.publish(PUBSUB_CONSTANTS.CHAT_QUERY_RESOLVED, {
@@ -229,31 +230,40 @@ export const handleShowColorOptionsInteriorIntent = (
   intentResponse: IGetActionIntent
 ) => {};
 
-// export const handleExteriorInteriorViewIntent = (
-//   query: string,
-//   intentResponse: IGetActionIntent
-// ) => {
-//   clearChatInputField();
-//   const modelViewerElement = document.querySelector("[model-viewer]") as InstanceType< typeof ModelViewerComponent>;
+export const handleExteriorInteriorViewIntent = (
+  query: string,
+  intentResponse: IGetActionIntent
+) => {
+  clearChatInputField();
 
-//   const modelViewerComponent = modelViewerElement.components["model-viewer"];
-//   if (intentResponse.value) { 
-//     if (modelViewerComponent.isInterior) {
-//       intentResponse.message = "You are already looking interior ";
-//     } else {
-//       modelViewerComponent.toggleInterior();
-//     }
-//   } else { 
-//     if (modelViewerComponent.isInterior) {
-//       modelViewerComponent.toggleInterior();
-//     } else {
-//       intentResponse.message = "You are already looking  exterior";
-//     }
-//   }
+  if (globals.threeJSComponent) {
+    const modelViewerComponent = globals.threeJSComponent; 
+    const isInteriorView = modelViewerComponent.isInteriorView(); 
 
-//   publishChat(query, intentResponse.message);
+    if (intentResponse.value) {
+      if (isInteriorView) {
+        intentResponse.message = "You are already viewing the interior.";
+      } else {
+        modelViewerComponent.switchToInteriorCamera(); 
+        intentResponse.message = "Switched to the interior view.";
+      }
+    } 
+    else {
+      if (isInteriorView) {
+        modelViewerComponent.switchToExteriorCamera(); 
+        intentResponse.message = "Switched to the exterior view.";
+      } else {
+        intentResponse.message = "You are already viewing the exterior.";
+      }
+    }
+  } else {
+    console.error('ThreeJSComponent is not initialized.');
+    intentResponse.message = 'Error: ThreeJSComponent is not available.';
+  }
 
-// };
+  publishChat(query, intentResponse.message);
+};
+
 
 export const handleDefaultIntent = (
   query: string,
