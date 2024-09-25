@@ -25,16 +25,18 @@ export const loadChat = (container: string) => {
     attachChatSubmitEvent();
     attachVoiceInputEvent();
     pubsub.subscribe(PUBSUB_CONSTANTS.CHAT_QUERY_RESOLVED, (chat: IQuesAns) => {
-      localStorage.setChat(chat);
+      const chatHistory = JSON.parse(localStorage.getItem('chatHistory') || '[]');
+      chatHistory.push(chat);
+      localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
+    
       const chatListContainer = $query(".chat-list-container");
       const chatList = $query(".chat-list");
       if (chatList && chatListContainer) {
         chatList.insertAdjacentHTML("beforeend", renderQuery(chat));
-        (chatListContainer as Element).scrollTop = (
-          chatListContainer as Element
-        ).scrollHeight;
+        (chatListContainer as Element).scrollTop = (chatListContainer as Element).scrollHeight;
       }
     });
+    
   }
 };
 

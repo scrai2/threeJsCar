@@ -33,6 +33,7 @@ export class ThreeJSComponent {
   public interiorCamera: InteriorCamera | null = null;
   public currentCamera: 'exterior' | 'interior' = 'exterior';
   public isDoorOpen: boolean = false;
+  public isInterior: boolean = false;
 
   public exteriorCameraPosition = new THREE.Vector3(0, 5, 15);
   public exteriorCameraTarget = new THREE.Vector3(0, 0, 0);
@@ -348,6 +349,7 @@ export class ThreeJSComponent {
   public switchToInteriorCamera() {
     this.currentCamera = 'interior';
     if (this.interiorCamera) {
+      this.isInterior = true;
       this.interiorCamera.resetCamera();
       this.controls.enabled = false;
       this.renderer.render(this.scene, this.interiorCamera.camera);
@@ -359,6 +361,7 @@ export class ThreeJSComponent {
     if (this.controls) {
       this.controls.enabled = true;
     }
+    this.isInterior = false;
     this.renderer.render(this.scene, this.camera);
   }
 
@@ -398,6 +401,10 @@ export class ThreeJSComponent {
     });
 
     return currentColor;
+  }
+
+  public isInteriorView(){
+    return this.isInterior;
   }
 
   public getCurrentIsDoorStatus(): boolean {
