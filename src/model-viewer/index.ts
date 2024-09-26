@@ -7,7 +7,6 @@ import { InteriorCamera } from './interiorCamera';
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader';
 import { GUI } from 'dat.gui';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
-import { showLoader } from '..';
 
 export class ThreeJSComponent {
   private scene: THREE.Scene;
@@ -25,7 +24,7 @@ export class ThreeJSComponent {
 
   private envMap: THREE.Texture | null = null;
   private envMapIntensity = 1.0;
-  private envMapRotation = 0; 
+  private envMapRotation = 0;
   private pmremGenerator: THREE.PMREMGenerator;
   private envMapGroup: THREE.Group;
 
@@ -54,13 +53,13 @@ export class ThreeJSComponent {
 
     this.camera = new THREE.PerspectiveCamera(
       25,
-      (window.innerWidth ) / window.innerHeight,
+      (window.innerWidth) / window.innerHeight,
       0.01,
       100
     );
     this.camera.position.set(0, 5, 15);
     this.interiorCamera = new InteriorCamera(this.canvas, this.scene);
-    this.pmremGenerator = new THREE.PMREMGenerator(this.renderer); 
+    this.pmremGenerator = new THREE.PMREMGenerator(this.renderer);
     this.pmremGenerator.compileEquirectangularShader();
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
@@ -82,7 +81,7 @@ export class ThreeJSComponent {
 
 
 
-    
+
     window.addEventListener('resize', this.onWindowResize.bind(this));
     window.addEventListener('keydown', this.onKeyDown.bind(this));
     window.addEventListener('keyup', this.onKeyUp.bind(this));
@@ -97,60 +96,20 @@ export class ThreeJSComponent {
     this.renderer.setPixelRatio(window.devicePixelRatio);
   }
 
-  initializeScene(updateLoaderProgress: (percentage: number) => void, hideLoader: () => void) {
-    let progress = 0;
+  private loadHDRI(): void {
+    const rgbeLoader = new RGBELoader();
+    rgbeLoader.load('images/mud_road_puresky_4k.hdr', (texture) => {
+      this.envMap = this.pmremGenerator.fromEquirectangular(texture).texture;
 
-    // Call the global showLoader function
-    showLoader();  // Show the loader at the start
+      this.scene.environment = this.envMap;
+      this.scene.background = this.envMap;
 
-    const incrementProgress = (amount: number) => {
-      progress += amount;
-      if (progress > 100) progress = 100;
-      updateLoaderProgress(progress);
-    };
+      texture.dispose();
+      this.pmremGenerator.dispose();
 
-    // Use Promise.all to wait for both the HDRI and the car model to load
-    Promise.all([
-      this.loadCarModel().then(() => incrementProgress(50)),  // 50% for car model
-      this.loadHDRI().then(() => incrementProgress(50))       // 50% for HDRI
-    ])
-      .then(() => {
-        console.log('Car model and HDRI loaded successfully.');
-        hideLoader();  // Call the global hideLoader function
-      })
-      .catch((error) => {
-        console.error('Error loading assets:', error);
-        hideLoader();  // Hide the loader even if there's an error
-      });
-  }
-  
-  
-
-  private loadHDRI(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      const rgbeLoader = new RGBELoader();
-      rgbeLoader.load('images/mud_road_puresky_4k.hdr', (texture) => {
-        try {
-          this.envMap = this.pmremGenerator.fromEquirectangular(texture).texture;
-          this.scene.environment = this.envMap;
-          this.scene.background = this.envMap;
-          
-          texture.dispose();
-          this.pmremGenerator.dispose();
-          
-          this.updateEnvMapIntensity();
-          resolve();  // Resolve when HDRI is loaded
-        } catch (error) {
-          console.error('Error loading HDRI:', error);
-          reject(error);  // Reject in case of any errors
-        }
-      }, undefined, (error) => {
-        console.error('Error loading HDRI:', error);
-        reject(error);  // Handle loading error
-      });
+      this.updateEnvMapIntensity();
     });
   }
-  
 
   private updateEnvMapIntensity(): void {
     this.scene.traverse((child) => {
@@ -208,7 +167,7 @@ export class ThreeJSComponent {
 
   private updateRendererExposure(exposure: number): void {
     this.renderer.toneMappingExposure = exposure;
-    this.renderer.render(this.scene, this.camera); 
+    this.renderer.render(this.scene, this.camera);
   }
 
   private updateToneMapping(toneMapping: string): void {
@@ -228,21 +187,21 @@ export class ThreeJSComponent {
       default:
         this.renderer.toneMapping = THREE.LinearToneMapping;
     }
-    this.renderer.render(this.scene, this.camera); 
+    this.renderer.render(this.scene, this.camera);
   }
 
 
 
   private updateHDRILightingIntensity(intensity: number): void {
     if (this.envMap) {
-      this.scene.environment = this.envMap; 
-      this.scene.background = this.envMap;  
+      this.scene.environment = this.envMap;
+      this.scene.background = this.envMap;
 
       this.scene.traverse((child) => {
         if (child instanceof THREE.Mesh) {
           const material = child.material as THREE.MeshStandardMaterial;
           if (material.envMap) {
-            material.envMapIntensity = intensity; 
+            material.envMapIntensity = intensity;
           }
         }
       });
@@ -252,45 +211,46 @@ export class ThreeJSComponent {
   private addFloor(): void {
     const loader = new GLTFLoader();
     const floorPath = 'https://d7to0drpifvba.cloudfront.net/3d-models/f-150/base/Ford_BG.gltf';
-  
+
     loader.load(floorPath, (gltf) => {
       const floor = gltf.scene;
-  
+
       floor.scale.set(1, 1, 1);
       floor.position.set(0, -1.500, 0);
       floor.rotation.set(0, 0, 0);
-  
+
       floor.traverse((child) => {
         if (child instanceof THREE.Mesh && child.material) {
           const material = child.material as THREE.MeshPhysicalMaterial;
-  
+
           if (material.name === 'MT_BGBase_Main') {
-            material.color.set("#C4C4C4"); 
-            material.roughness = 0; 
-            material.metalness = 0.8; 
+            material.color.set("#C4C4C4");
+            material.roughness = 0;
+            material.metalness = 0.8;
             material.reflectivity = 0.9;
-            material.needsUpdate = true; 
+            material.needsUpdate = true;
             child.receiveShadow = true;
           }
-  
+
           if (material.name === 'MT_BGBase_Emission') {
-            material.emissive.set(0x00ff00); 
-            material.emissiveIntensity = 10; 
-            material.needsUpdate = true; 
+            material.emissive.set(0x00ff00);
+            material.emissiveIntensity = 10;
+            material.needsUpdate = true;
           }
         }
       });
-  
+
       this.scene.add(floor);
     }, undefined, (error) => {
       console.error('An error occurred while loading the GLTF model:', error);
     });
   }
-  
-  
 
-  private loadCarModel(): Promise<void> {
-    return loadModel(this.scene, 'https://d7to0drpifvba.cloudfront.net/3d-models/f-150/Ford_F150.gltf')
+
+
+
+  private loadCarModel() {
+    loadModel(this.scene, 'https://d7to0drpifvba.cloudfront.net/3d-models/f-150/Ford_F150.gltf')
       .then(({ model, animations }) => {
         this.animationManager = new AnimationManager(model);
         this.animationManager.loadAnimations(animations);
@@ -298,7 +258,6 @@ export class ThreeJSComponent {
       })
       .catch((error) => {
         console.error('Error loading car model:', error);
-        throw error; // Rethrow to ensure the Promise is rejected
       });
   }
 
@@ -350,7 +309,7 @@ export class ThreeJSComponent {
   }
 
   private onWindowResize() {
-    this.camera.aspect = (window.innerWidth ) / window.innerHeight;
+    this.camera.aspect = (window.innerWidth) / window.innerHeight;
     this.camera.updateProjectionMatrix();
     this.setSize();
     this.interiorCamera?.resizeCamera();
@@ -360,17 +319,17 @@ export class ThreeJSComponent {
     this.isAnimationPlaying = false;
   }
 
-  public playAnimation(animationName: string) {
+  public playAllDoorsOpening() {
     if (this.animationManager) {
-      this.animationManager.setAnimationCompleteCallback(() => {
-        if (animationName === 'All_Doors_Opening') {
-          this.isDoorOpen = true;
-          this.playAnimation('All_doors_closing');
-        } else if (animationName === 'All_doors_closing') {
-          this.isDoorOpen = false;
-        }
-      });
-      this.animationManager.playAnimation(animationName);
+      this.animationManager.playAnimation('All_Doors_Opening');
+      this.isDoorOpen = true;
+    }
+  }
+
+  public playAllDoorsClosing() {
+    if (this.animationManager) {
+      this.animationManager.playAnimation('All_doors_closing');
+      this.isDoorOpen = false;
     }
   }
 
@@ -444,7 +403,7 @@ export class ThreeJSComponent {
     return currentColor;
   }
 
-  public isInteriorView(){
+  public isInteriorView() {
     return this.isInterior;
   }
 
@@ -453,12 +412,12 @@ export class ThreeJSComponent {
   }
 
 
-  public toggleAlloyMeshesVisibility( visibleMeshName: string): void {
+  public toggleAlloyMeshesVisibility(visibleMeshName: string): void {
     const alloyMeshNames = ["SM-Aloy-Low_01", "SM_Alloy_002", "SM_Alloy_003", "SM_Alloy_004"];
-  
+
     this.animationManager?.model.traverse((child) => {
       if (child instanceof THREE.Mesh || child instanceof THREE.Group) {
-        if (alloyMeshNames.includes(child.name)) {          
+        if (alloyMeshNames.includes(child.name)) {
           child.visible = (child.name === visibleMeshName);
         }
       }

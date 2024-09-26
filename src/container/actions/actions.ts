@@ -12,7 +12,7 @@ export const loadActions = (container: string) => {
 };
 
 
-let doorOpen = true;
+// let doorOpen = false;
 
 export const loadOpenCloseDoorAction = (container: string) => {
   const openCloseDoorContainer = $query(".action-container");
@@ -22,15 +22,14 @@ export const loadOpenCloseDoorAction = (container: string) => {
   const doorButton = $query(".action-container-door-opened");
   if (doorButton) {
     doorButton.addEventListener("click", () => {
-      console.log("Open/Close door button clicked!");
 
       if (globals.threeJSComponent) {
-        if (doorOpen) {
-          globals.threeJSComponent.playAnimation("All_Doors_Opening");
+        if (globals.threeJSComponent.isDoorOpen) {
+          globals.threeJSComponent.playAllDoorsOpening();
         } else {
-          globals.threeJSComponent.playAnimation("All_doors_closing");
+          globals.threeJSComponent.playAllDoorsClosing();
         }
-        doorOpen = !doorOpen;
+        globals.threeJSComponent.isDoorOpen = !globals.threeJSComponent.isDoorOpen;
       } else {
         console.error("ThreeJSComponent instance is not initialized.");
       }

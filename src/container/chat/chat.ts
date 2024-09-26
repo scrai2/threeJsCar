@@ -127,31 +127,48 @@ export const attachVoiceInputEvent = () => {
     recognition = new ((window as any).webkitSpeechRecognition ||
       (window as any).SpeechRecognition)();
     recognition!.lang = "en-US";
+
+
     recognition!.start();
+    recognition!.start = () => {
+      console.log("Speech recognition started");
+    };
 
     recognition!.onresult = (event: SpeechRecognitionEvent) => {
       const speechToText: string =
         event.results[event.results.length - 1][0].transcript;
       inputField.value += speechToText;
       inputField.focus();
+      console.log("Speech to text: ", speechToText);
     };
-    recognition!.onend = () => {};
+
+    recognition!.onend = () => {
+      console.log("Speech recognition ended");
+     
+    };
+
     recognition!.onerror = (event: SpeechRecognitionErrorEvent) => {
       console.error("Speech recognition error occurred: " + event.error);
     };
   };
 
-  // Function to handle voice input stop
   const stopListening = async () => {
     if (recognition) {
       startListeningBtn.classList.remove("pulse");
       recognition.stop();
       await chatSubmitHandler(inputField, chatSubmitButton);
+      console.log("Stopped speech recognition");
     }
   };
-  startListeningBtn.addEventListener("mousedown", startListening);
-  startListeningBtn.addEventListener("mouseup", stopListening);
+
+  if (startListeningBtn) {
+    startListeningBtn.addEventListener("mousedown", startListening);
+    startListeningBtn.addEventListener("mouseup", stopListening);
+  } else {
+    console.error("Voice input button not found.");
+  }
 };
+
 
 export const attachChatSubmitEvent = () => {
   const chatInputField = $query(`.chat-input`);
