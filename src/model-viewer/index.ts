@@ -129,7 +129,7 @@ export class ThreeJSComponent {
   private loadHDRI(): Promise<void> {
     return new Promise((resolve, reject) => {
       const rgbeLoader = new RGBELoader();
-      rgbeLoader.load('images/resting_place_4k.hdr', (texture) => {
+      rgbeLoader.load('images/mud_road_puresky_4k.hdr', (texture) => {
         try {
           this.envMap = this.pmremGenerator.fromEquirectangular(texture).texture;
           this.scene.environment = this.envMap;
