@@ -7,6 +7,7 @@ import { InteriorCamera } from './interiorCamera';
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader';
 import { GUI } from 'dat.gui';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import { showLoader } from '..';
 
 export class ThreeJSComponent {
   private scene: THREE.Scene;
@@ -96,20 +97,60 @@ export class ThreeJSComponent {
     this.renderer.setPixelRatio(window.devicePixelRatio);
   }
 
-  private loadHDRI(): void {
-    const rgbeLoader = new RGBELoader();
-    rgbeLoader.load('images/backtest.hdr', (texture) => {
-      this.envMap = this.pmremGenerator.fromEquirectangular(texture).texture;
+  initializeScene(updateLoaderProgress: (percentage: number) => void, hideLoader: () => void) {
+    let progress = 0;
 
-      this.scene.environment = this.envMap;
-      this.scene.background = this.envMap;
+    // Call the global showLoader function
+    showLoader();  // Show the loader at the start
 
-      texture.dispose();
-      this.pmremGenerator.dispose();
+    const incrementProgress = (amount: number) => {
+      progress += amount;
+      if (progress > 100) progress = 100;
+      updateLoaderProgress(progress);
+    };
 
-      this.updateEnvMapIntensity(); 
+    // Use Promise.all to wait for both the HDRI and the car model to load
+    Promise.all([
+      this.loadCarModel().then(() => incrementProgress(50)),  // 50% for car model
+      this.loadHDRI().then(() => incrementProgress(50))       // 50% for HDRI
+    ])
+      .then(() => {
+        console.log('Car model and HDRI loaded successfully.');
+        hideLoader();  // Call the global hideLoader function
+      })
+      .catch((error) => {
+        console.error('Error loading assets:', error);
+        hideLoader();  // Hide the loader even if there's an error
+      });
+  }
+  
+  
+
+  private loadHDRI(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const rgbeLoader = new RGBELoader();
+      rgbeLoader.load('images/resting_place_4k.hdr', (texture) => {
+        try {
+          this.envMap = this.pmremGenerator.fromEquirectangular(texture).texture;
+          this.scene.environment = this.envMap;
+          this.scene.background = this.envMap;
+          
+          texture.dispose();
+          this.pmremGenerator.dispose();
+          
+          this.updateEnvMapIntensity();
+          resolve();  // Resolve when HDRI is loaded
+        } catch (error) {
+          console.error('Error loading HDRI:', error);
+          reject(error);  // Reject in case of any errors
+        }
+      }, undefined, (error) => {
+        console.error('Error loading HDRI:', error);
+        reject(error);  // Handle loading error
+      });
     });
   }
+  
 
   private updateEnvMapIntensity(): void {
     this.scene.traverse((child) => {
@@ -247,10 +288,9 @@ export class ThreeJSComponent {
   }
   
   
-  
 
-  private loadCarModel() {
-    loadModel(this.scene, 'https://d7to0drpifvba.cloudfront.net/3d-models/f-150/Ford_F150.gltf')
+  private loadCarModel(): Promise<void> {
+    return loadModel(this.scene, 'https://d7to0drpifvba.cloudfront.net/3d-models/f-150/Ford_F150.gltf')
       .then(({ model, animations }) => {
         this.animationManager = new AnimationManager(model);
         this.animationManager.loadAnimations(animations);
@@ -258,6 +298,7 @@ export class ThreeJSComponent {
       })
       .catch((error) => {
         console.error('Error loading car model:', error);
+        throw error; // Rethrow to ensure the Promise is rejected
       });
   }
 
