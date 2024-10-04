@@ -51,6 +51,9 @@ export class ThreeJSComponent {
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.setClearColor('#020202');
 
+    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    this.renderer.toneMappingExposure = 1.0; 
+
     this.camera = new THREE.PerspectiveCamera(
       25,
       (window.innerWidth) / window.innerHeight,
@@ -131,7 +134,7 @@ export class ThreeJSComponent {
       'Env Map Rotation': 0,
       'Enable Env Map': true,
       'Car Paint Color': '#ffffff',
-      'Tone Mapping': 'Linear',
+      'Tone Mapping': 'ACESFilmic',
     };
 
     gui.add(envControls, 'Env Map Intensity', 0, 2, 0.01).onChange((value: number) => {
@@ -156,7 +159,7 @@ export class ThreeJSComponent {
       this.updateColor(color);
     });
 
-    gui.add(envControls, 'Tone Mapping', ['Linear', 'Reinhard', 'Cineon', 'ACESFilmic']).onChange((value: string) => {
+    gui.add(envControls, 'Tone Mapping', ['ACESFilmic', 'Linear', 'Reinhard', 'Cineon' ]).onChange((value: string) => {
       this.updateToneMapping(value);
     });
 
