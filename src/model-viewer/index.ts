@@ -101,7 +101,7 @@ export class ThreeJSComponent {
 
   private loadHDRI(): void {
     const rgbeLoader = new RGBELoader();
-    rgbeLoader.load('images/mud_road_puresky_4k.hdr', (texture) => {
+    rgbeLoader.load('images/pizzo_pernice_puresky_4k.hdr', (texture) => {
       this.envMap = this.pmremGenerator.fromEquirectangular(texture).texture;
 
       this.scene.environment = this.envMap;
