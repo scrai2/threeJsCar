@@ -1,12 +1,12 @@
 replicaCount: 1
 
 image:
-  repository: registry.exkube.com/furniture
+  repository: registry.exkube.com/vyom-frontend-v2
   pullPolicy: IfNotPresent
   tag: "e8cc76e"
 
 imagePullSecrets: []
-nameOverride: "furniture"
+nameOverride: "vyom-frontend-v2"
 fullnameOverride: ""
 
 service:
@@ -37,5 +37,5 @@ tolerations: {}
 affinity: {}
 
 config:
-  BASE_URL: https://furniture.exkube.com
+  BASE_URL: https://vyom-api.exsq.ai
   CDN_ASSETS_BASE_URL: https://d7to0drpifvba.cloudfront.net/static
