@@ -5,7 +5,7 @@ import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
 export function loadModel(
   scene: THREE.Scene, 
   modelPath: string, 
-  position: THREE.Vector3 = new THREE.Vector3(0, -1.75, 0),
+  position: THREE.Vector3 = new THREE.Vector3(0, -0.15, 0),
   scale: THREE.Vector3 = new THREE.Vector3(1, 1, 1),
   rotation: THREE.Euler = new THREE.Euler(0, 0, 0)
 ): Promise<{ model: THREE.Group; animations: THREE.AnimationClip[] }> {

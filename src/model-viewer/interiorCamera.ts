@@ -21,7 +21,7 @@ export class InteriorCamera {
     this.scene = scene;
 
     this.camera = new THREE.PerspectiveCamera(75, 1.8, 0.01, 100);
-    this.position = new THREE.Vector3(-0.2, -0.29, 0);
+    this.position = new THREE.Vector3(-0.2, 1.5, 0);
     this.target = new THREE.Vector3(-5, -0.3, 0);
 
     this.camera.position.copy(this.position);

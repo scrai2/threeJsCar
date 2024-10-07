@@ -55,7 +55,7 @@ export class ThreeJSComponent {
     this.renderer.toneMappingExposure = 1.0; 
 
     this.camera = new THREE.PerspectiveCamera(
-      25,
+      18,
       (window.innerWidth) / window.innerHeight,
       0.01,
       100
@@ -219,7 +219,7 @@ export class ThreeJSComponent {
       const floor = gltf.scene;
 
       floor.scale.set(1, 1, 1);
-      floor.position.set(0, -1.500, 0);
+      floor.position.set(0, 0, 0);
       floor.rotation.set(0, 0, 0);
 
       floor.traverse((child) => {
@@ -258,6 +258,8 @@ export class ThreeJSComponent {
         this.animationManager = new AnimationManager(model);
         this.animationManager.loadAnimations(animations);
         this.animationManager.setAnimationCompleteCallback(this.onAnimationComplete.bind(this));
+        this.playAllDoorsOpening();
+        this.playAllDoorsClosing(); 
       })
       .catch((error) => {
         console.error('Error loading car model:', error);
