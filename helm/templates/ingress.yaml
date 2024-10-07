@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: furniture-ingress
+  namespace: game-api # Ensure this matches the namespace where MinIO is deployed
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    cert-manager.io/cluster-issuer: "letsencrypt"
+spec:
+  tls:
+  - hosts:
+    - furniture.exkube.com
+    secretName: furniture-tls
+  ingressClassName: nginx
+  rules:
+  - host: furniture.exkube.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: furniture-service  # Replace with the name of your MinIO service
+            port:
+              number: 3000  # Ensure this matches the port on which MinIO is exposed
+

@@ -1,0 +1,41 @@
+replicaCount: 1
+
+image:
+  repository: registry.exkube.com/furniture
+  pullPolicy: IfNotPresent
+  tag: "e8cc76e"
+
+imagePullSecrets: []
+nameOverride: "furniture"
+fullnameOverride: ""
+
+service:
+  port: 3000
+
+resources: 
+  requests:
+    memory: "64Mi"
+    cpu: "250m"
+
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 1
+  targetCPUUtilizationPercentage: 80
+
+serviceAccount:
+  name: dafault
+
+securityContext:
+  allowPrivilegeEscalation: false
+  runAsNonRoot: false
+
+nodeSelector: {}
+
+tolerations: {}
+
+affinity: {}
+
+config:
+  BASE_URL: https://furniture.exkube.com
+  CDN_ASSETS_BASE_URL: https://d7to0drpifvba.cloudfront.net/static
