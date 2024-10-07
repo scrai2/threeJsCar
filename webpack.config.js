@@ -60,7 +60,6 @@ module.exports = {
         { from: "models", to: "models" }, 
       ],
     }),
-    new Dotenv(),
     new MiniCssExtractPlugin({
       filename: 'styles.css',
     }),
