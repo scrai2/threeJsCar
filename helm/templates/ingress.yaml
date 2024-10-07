@@ -2,7 +2,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: vyom-frontend-v2-ingress
-  namespace: game-api # Ensure this matches the namespace where MinIO is deployed
+  namespace: vyom-dev
   annotations:
     nginx.ingress.kubernetes.io/proxy-body-size: "0"
     cert-manager.io/cluster-issuer: "letsencrypt"
@@ -20,7 +20,7 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: vyom-frontend-v2-service  # Replace with the name of your MinIO service
+            name: vyom-frontend-v2-service  
             port:
-              number: 3000  # Ensure this matches the port on which MinIO is exposed
+              number: 3000  
 
