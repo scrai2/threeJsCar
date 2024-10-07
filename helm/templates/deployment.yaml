@@ -1,16 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "furniture.fullname" . }}
+  name: {{ include "vyom-frontend-v2.fullname" . }}
   labels:
-    {{- include "furniture.labels" . | nindent 4 }}
+    {{- include "vyom-frontend-v2.labels" . | nindent 4 }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
-      {{- include "furniture.selectorLabels" . | nindent 6 }}
+      {{- include "vyom-frontend-v2.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -18,7 +18,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "furniture.selectorLabels" . | nindent 8 }}
+        {{- include "vyom-frontend-v2.selectorLabels" . | nindent 8 }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -40,7 +40,7 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
           envFrom:
           - configMapRef:
-              name: furniture-config
+              name: vyom-frontend-v2-config
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
