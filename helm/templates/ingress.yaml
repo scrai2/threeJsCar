@@ -9,11 +9,11 @@ metadata:
 spec:
   tls:
   - hosts:
-    - vyom-v2.exkube.com
+    - vyom-v2.kubepipe.in
     secretName: vyom-frontend-v2-tls
   ingressClassName: nginx
   rules:
-  - host: vyom-v2.exkube.com
+  - host: vyom-v2.kubepipe.in
     http:
       paths:
       - path: /
