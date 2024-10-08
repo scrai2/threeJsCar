@@ -51,8 +51,8 @@ export class ThreeJSComponent {
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.setClearColor('#020202');
 
-    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.0; 
+    this.renderer.toneMapping = THREE.LinearToneMapping;
+    this.renderer.toneMappingExposure = 2.0; 
 
     this.camera = new THREE.PerspectiveCamera(
       18,
@@ -101,7 +101,7 @@ export class ThreeJSComponent {
 
   private loadHDRI(): void {
     const rgbeLoader = new RGBELoader();
-    rgbeLoader.load('images/pizzo_pernice_puresky_4k.hdr', (texture) => {
+    rgbeLoader.load('images/table_mountain_4k.hdr', (texture) => {
       this.envMap = this.pmremGenerator.fromEquirectangular(texture).texture;
 
       this.scene.environment = this.envMap;
@@ -159,7 +159,7 @@ export class ThreeJSComponent {
       this.updateColor(color);
     });
 
-    gui.add(envControls, 'Tone Mapping', ['ACESFilmic', 'Linear', 'Reinhard', 'Cineon' ]).onChange((value: string) => {
+    gui.add(envControls, 'Tone Mapping', [ 'Linear', 'ACESFilmic', 'Reinhard', 'Cineon' ]).onChange((value: string) => {
       this.updateToneMapping(value);
     });
 
@@ -213,13 +213,13 @@ export class ThreeJSComponent {
 
   private addFloor(): void {
     const loader = new GLTFLoader();
-    const floorPath = 'https://d7to0drpifvba.cloudfront.net/3d-models/f-150/base2/Base.gltf';
+    const floorPath = 'https://d7to0drpifvba.cloudfront.net/3d-models/f-150/base3/Base.gltf';
 
     loader.load(floorPath, (gltf) => {
       const floor = gltf.scene;
 
       floor.scale.set(1, 1, 1);
-      floor.position.set(0, 0, 0);
+      floor.position.set(0, -0.5, 0);
       floor.rotation.set(0, 0, 0);
 
       floor.traverse((child) => {
@@ -253,7 +253,7 @@ export class ThreeJSComponent {
 
 
   private loadCarModel() {
-    loadModel(this.scene, 'https://d7to0drpifvba.cloudfront.net/3d-models/f-150v2/Ford_f150.gltf')
+    loadModel(this.scene, 'https://d7to0drpifvba.cloudfront.net/3d-models/f-150v4/Ford_f150.gltf')
       .then(({ model, animations }) => {
         this.animationManager = new AnimationManager(model);
         this.animationManager.loadAnimations(animations);

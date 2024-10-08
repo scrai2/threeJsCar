@@ -8,7 +8,7 @@ import { v4 } from "uuid";
 import { globals } from '../../model-viewer/globals';
 
 type ColorMapping = {
-  readonly blue: "#003478";
+  readonly blue: "#060DC4";
   readonly lightingBlue: "#23438A";
   readonly black: "#000000";
   readonly red: "#5F0B0B";
@@ -95,7 +95,7 @@ export const handleCarInfoQueryIntent = async (
   }
 };
 const colorMapping: ColorMapping = {
-  blue: "#003478",
+  blue: "#060DC4",
   lightingBlue: "#23438A",
   black: "#000000",
   red: "#5F0B0B",

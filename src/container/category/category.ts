@@ -18,7 +18,7 @@ export const CATEGORIES: ICategory[] = [
     availableOptions: [
       {
         id: 2801,
-        name: "#003478",
+        name: "#060DC4",
         isSelected: true,
         thumbnailPath: `${Icons}#darkblueIcon`,
       },

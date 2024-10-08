@@ -5,7 +5,7 @@ import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
 export function loadModel(
   scene: THREE.Scene, 
   modelPath: string, 
-  position: THREE.Vector3 = new THREE.Vector3(0, -0.15, 0),
+  position: THREE.Vector3 = new THREE.Vector3(0, -0.750, 0),
   scale: THREE.Vector3 = new THREE.Vector3(1, 1, 1),
   rotation: THREE.Euler = new THREE.Euler(0, 0, 0)
 ): Promise<{ model: THREE.Group; animations: THREE.AnimationClip[] }> {
@@ -77,8 +77,7 @@ function updateChromeMaterial(
   model: THREE.Group,
   options: ChromeMaterialOptions = {}
 ): void {
-  const chromedMaterialNames = ["Chrome", "Grill_chrom", "Front_Grill_01", "chrome_leg", "back_chrom"];
-  const envMap = loadCubeTexture();
+  const chromedMaterialNames = ["chrome", "Grill_chrom", "Front_Grill_01", "chrome_leg", "back_chrom"];
 
   model.traverse((child) => {
     if (child instanceof THREE.Mesh && child.material) {
@@ -89,7 +88,6 @@ function updateChromeMaterial(
           name: child.material.name,
           color: options.color || "#F5F5F8",
           map: child.material.map,
-          envMap: envMap,
           envMapIntensity: options.envMapIntensity || 2,
           metalness: options.metalness || 1,
           roughness: options.roughness || 0.15,
@@ -103,13 +101,6 @@ function updateChromeMaterial(
     }
   });
 }
-
-function loadCubeTexture(): THREE.CubeTexture {
-  return new THREE.CubeTextureLoader()
-    .setPath("images/")
-    .load(["px.jpg", "nx.jpg", "py.jpg", "ny.jpg", "pz.jpg", "nz.jpg"]);
-}
-
 
 function toggleAlloyMeshesVisibility(model: THREE.Group): void {
   const alloyMeshNames = ["SM-Aloy-Low_01", "SM_Alloy_002", "SM_Alloy_003", "SM_Alloy_004"];
