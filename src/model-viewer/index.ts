@@ -55,7 +55,7 @@ export class ThreeJSComponent {
     this.renderer.toneMappingExposure = 2.0; 
 
     this.camera = new THREE.PerspectiveCamera(
-      18,
+      15,
       (window.innerWidth) / window.innerHeight,
       0.01,
       100
@@ -218,7 +218,7 @@ export class ThreeJSComponent {
     loader.load(floorPath, (gltf) => {
       const floor = gltf.scene;
 
-      floor.scale.set(1, 1, 1);
+      floor.scale.set(1.5, 1.5, 1.5);
       floor.position.set(0, -0.5, 0);
       floor.rotation.set(0, 0, 0);
 
