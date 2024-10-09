@@ -40,6 +40,7 @@ export function loadModel(
           clearcoat: 2.5,
           specularIntensity: 1.5,
         });
+        updateCarMaterial(model);
 
         toggleAlloyMeshesVisibility(model);
 
