@@ -8,6 +8,24 @@
   <title>Ford f-150</title>
 
   <script src="./bundle.js"></script>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden; /* Prevents scrolling */
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block; /* Removes default inline spacing */
+      position: absolute; /* Allows layering */
+      z-index: 0; /* Places canvas below other elements */
+    }    
+    
+  </style>
 </head>
 
 <body>
