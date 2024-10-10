@@ -21,6 +21,7 @@ export class ThreeJSComponent {
 
   private glassGuiControls: { [key: string]: any } = {};
   private glassMaterialName: string = 'MT_Glass';
+  private minCameraHeight: number = 2;
 
   private envMap: THREE.Texture | null = null;
   private envMapIntensity = 1.0;
@@ -51,8 +52,8 @@ export class ThreeJSComponent {
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.setClearColor('#020202');
 
-    this.renderer.toneMapping = THREE.LinearToneMapping;
-    this.renderer.toneMappingExposure = 2.0; 
+    this.renderer.toneMapping = THREE.CineonToneMapping;
+    this.renderer.toneMappingExposure = 0.8; 
 
     this.camera = new THREE.PerspectiveCamera(
       15,
@@ -101,11 +102,12 @@ export class ThreeJSComponent {
 
   private loadHDRI(): void {
     const rgbeLoader = new RGBELoader();
-    rgbeLoader.load('images/table_mountain_4k.hdr', (texture) => {
+    rgbeLoader.load('images/backtest.hdr', (texture) => {
       this.envMap = this.pmremGenerator.fromEquirectangular(texture).texture;
 
       this.scene.environment = this.envMap;
       this.scene.background = this.envMap;
+      // this.envMapIntensity = 0.65;
 
       texture.dispose();
       this.pmremGenerator.dispose();
@@ -129,8 +131,8 @@ export class ThreeJSComponent {
   private addGUI(): void {
     const gui = new GUI();
     const envControls = {
-      'Env Map Intensity': 1.0,
-      'Exposure': 1.0,
+      'Env Map Intensity': 0.25,
+      'Exposure': 1.5,
       'Env Map Rotation': 0,
       'Enable Env Map': true,
       'Car Paint Color': '#ffffff',
@@ -231,6 +233,7 @@ export class ThreeJSComponent {
             material.roughness = 0;
             material.metalness = 0.8;
             material.reflectivity = 0.9;
+            // material.envMapIntensity = 
             material.needsUpdate = true;
             child.receiveShadow = true;
           }
@@ -273,6 +276,11 @@ export class ThreeJSComponent {
     this.animationManager?.update(deltaTime);
 
     this.handleCameraMovement(deltaTime);
+
+    if (this.currentCamera === 'exterior' && this.camera.position.y < 2) {
+      this.camera.position.y = 2;
+    }
+
 
     this.renderer.setViewport(0, 0, window.innerWidth, window.innerHeight);
     this.renderer.setScissor(0, 0, window.innerWidth, window.innerHeight);

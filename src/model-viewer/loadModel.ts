@@ -34,14 +34,13 @@ export function loadModel(
 
         updateChromeMaterial(model, {
           color: "#C0C0C0", 
-          envMapIntensity: 2.5, 
+          envMapIntensity: 1, 
           metalness: 1,
-          roughness: 0.1,
+          roughness: 0.0,
           clearcoat: 2.5,
           specularIntensity: 1.5,
         });
-        updateCarMaterial(model);
-
+        updateCarMaterial(model);        
         toggleAlloyMeshesVisibility(model);
 
         resolve({ model, animations: gltf.animations });
@@ -78,7 +77,46 @@ function updateChromeMaterial(
   model: THREE.Group,
   options: ChromeMaterialOptions = {}
 ): void {
-  const chromedMaterialNames = ["chrome", "back_chrom"];
+  const chromedMaterialNames = ["back_chrom"];
+  let sharedChromeMaterial: THREE.MeshPhysicalMaterial | null = null;
+
+  model.traverse((child) => {
+    if (child instanceof THREE.Mesh && child.material) {
+      child.castShadow = true;
+      child.receiveShadow = true;
+
+      // Check if the material is one we want to update
+      if (chromedMaterialNames.includes(child.material.name)) {
+        // Create or reuse the shared material
+        if (!sharedChromeMaterial) {
+          sharedChromeMaterial = new THREE.MeshPhysicalMaterial({
+            name: "back_chrom",
+            color: options.color || "#dadada",
+            map: child.material.map,
+            envMapIntensity: options.envMapIntensity || 1,
+            metalness: options.metalness || 1,
+            roughness: options.roughness || 0.0,
+            clearcoat: options.clearcoat || 3,
+            specularIntensity: options.specularIntensity || 3,
+          });
+        }
+
+        // Assign the shared material to the child
+        child.material = sharedChromeMaterial;
+        child.material.needsUpdate = true;
+      }
+    }
+  });
+  updateCarGlassMaterial(model);
+  updateAlloyChromeMaterial(model);
+}
+
+
+function updateAlloyChromeMaterial(
+  model: THREE.Group,
+  options: ChromeMaterialOptions = {}
+): void {
+  const chromedMaterialNames = ["chrome"];
   let sharedChromeMaterial: THREE.MeshPhysicalMaterial | null = null;
 
   model.traverse((child) => {
@@ -92,13 +130,58 @@ function updateChromeMaterial(
         if (!sharedChromeMaterial) {
           sharedChromeMaterial = new THREE.MeshPhysicalMaterial({
             name: "chrome",
-            color: options.color || "#F5F5F8",
+            color: options.color || "#dadada",
             map: child.material.map,
-            envMapIntensity: options.envMapIntensity || 2,
+            envMapIntensity: options.envMapIntensity || 1,
             metalness: options.metalness || 1,
-            roughness: options.roughness || 0.15,
+            roughness: options.roughness || 0.0,
             clearcoat: options.clearcoat || 3,
             specularIntensity: options.specularIntensity || 3,
+          });
+        }
+
+        // Assign the shared material to the child
+        child.material = sharedChromeMaterial;
+        child.material.needsUpdate = true;
+      }
+    }
+  });
+  updateCarGlassMaterial(model)
+}
+
+function updateCarGlassMaterial(
+  model: THREE.Group,
+): void {
+  const chromedMaterialNames = ["GlassClear","MT_Glass", "glass_dark" ];
+  let sharedChromeMaterial: THREE.MeshPhysicalMaterial | null = null;
+
+  model.traverse((child) => {
+    if (child instanceof THREE.Mesh && child.material) {
+      child.castShadow = true;
+      child.receiveShadow = true;
+
+      // Check if the material is one we want to update
+      if (chromedMaterialNames.includes(child.material.name)) {
+        // Create or reuse the shared material
+        if (!sharedChromeMaterial) {
+          sharedChromeMaterial = new THREE.MeshPhysicalMaterial({
+            // color: "#2e6bde",
+            name: child.material.name,
+            roughness: 0.0,
+            metalness: 0.2,
+            envMapIntensity: 0.2,
+            reflectivity: 1,
+            opacity: 1,
+            ior: 1,
+            sheen: 1, 
+          
+            
+            // map: child.material.map,
+            // envMapIntensity: options.envMapIntensity || 2,
+            // metalness: options.metalness || 1,
+            // roughness: options.roughness || 0.0,
+            // clearcoat: options.clearcoat || 3,
+            // specularIntensity: options.specularIntensity || 3,
           });
         }
 
@@ -128,11 +211,16 @@ function updateCarMaterial(
         if (!sharedChromeMaterial) {
           sharedChromeMaterial = new THREE.MeshPhysicalMaterial({
             name: "Car_paint_Original",
-            color: "#060DC4"
+            color: "#2e6bde",
+            roughness: 0.0,
+            metalness: 0.2,
+            envMapIntensity: 0.2,
+            reflectivity: 1
+            
             // map: child.material.map,
             // envMapIntensity: options.envMapIntensity || 2,
             // metalness: options.metalness || 1,
-            // roughness: options.roughness || 0.15,
+            // roughness: options.roughness || 0.0,
             // clearcoat: options.clearcoat || 3,
             // specularIntensity: options.specularIntensity || 3,
           });
