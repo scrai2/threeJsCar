@@ -34,13 +34,13 @@ export function loadModel(
 
         updateChromeMaterial(model, {
           color: "#C0C0C0", 
-          envMapIntensity: 2.5, 
+          envMapIntensity: 1, 
           metalness: 1,
-          roughness: 0.1,
+          roughness: 0.0,
           clearcoat: 2.5,
           specularIntensity: 1.5,
         });
-
+        updateCarMaterial(model);
         toggleAlloyMeshesVisibility(model);
 
         resolve({ model, animations: gltf.animations });
@@ -91,11 +91,11 @@ function updateChromeMaterial(
         if (!sharedChromeMaterial) {
           sharedChromeMaterial = new THREE.MeshPhysicalMaterial({
             name: "chrome",
-            color: options.color || "#F5F5F8",
+            color: options.color || "#dadada",
             map: child.material.map,
-            envMapIntensity: options.envMapIntensity || 2,
+            envMapIntensity: options.envMapIntensity || 1,
             metalness: options.metalness || 1,
-            roughness: options.roughness || 0.15,
+            roughness: options.roughness || 0.0,
             clearcoat: options.clearcoat || 3,
             specularIntensity: options.specularIntensity || 3,
           });
@@ -127,11 +127,16 @@ function updateCarMaterial(
         if (!sharedChromeMaterial) {
           sharedChromeMaterial = new THREE.MeshPhysicalMaterial({
             name: "Car_paint_Original",
-            color: "#060DC4"
+            color: "#2e6bde",
+            roughness: 0.0,
+            metalness: 0.2,
+            envMapIntensity: 0.2,
+            reflectivity: 1
+            
             // map: child.material.map,
             // envMapIntensity: options.envMapIntensity || 2,
             // metalness: options.metalness || 1,
-            // roughness: options.roughness || 0.15,
+            // roughness: options.roughness || 0.0,
             // clearcoat: options.clearcoat || 3,
             // specularIntensity: options.specularIntensity || 3,
           });
