@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
+
 
 export function loadModel(
   scene: THREE.Scene, 
@@ -25,13 +25,13 @@ export function loadModel(
           }
         });
         scene.add(model);
-
+        
         if (gltf.animations.length > 0) {
           gltf.animations.forEach((clip) => console.log(`Loaded animation: ${clip.name}`));
         } else {
           console.log("No animations found.");
         }
-
+        
         updateChromeMaterial(model, {
           color: "#C0C0C0", 
           envMapIntensity: 2.5, 

@@ -6,7 +6,11 @@ import { createLights } from './light';
 import { InteriorCamera } from './interiorCamera';
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader';
 import { GUI } from 'dat.gui';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import { addFloor } from './floor';
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
+import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass';
+
 
 export class ThreeJSComponent {
   private scene: THREE.Scene;
@@ -18,6 +22,7 @@ export class ThreeJSComponent {
   private isAnimationPlaying: boolean = false;
   private materialGuiControls: { [key: string]: any } = {};
   private materialType: string = 'MeshPhysicalMaterial';
+  private minCameraHeight: number = 2;
 
   private glassGuiControls: { [key: string]: any } = {};
   private glassMaterialName: string = 'MT_Glass';
@@ -34,6 +39,9 @@ export class ThreeJSComponent {
   public currentCamera: 'exterior' | 'interior' = 'exterior';
   public isDoorOpen: boolean = false;
   public isInterior: boolean = false;
+  private composer: EffectComposer;
+  private renderPass: RenderPass;
+  private bloomPass: UnrealBloomPass;
 
   public exteriorCameraPosition = new THREE.Vector3(0, 5, 15);
   public exteriorCameraTarget = new THREE.Vector3(0, 0, 0);
@@ -52,7 +60,8 @@ export class ThreeJSComponent {
     this.renderer.setClearColor('#020202');
 
     this.renderer.toneMapping = THREE.LinearToneMapping;
-    this.renderer.toneMappingExposure = 2.0; 
+    this.renderer.toneMappingExposure = 2.0;
+    this.renderer.outputColorSpace = THREE.SRGBColorSpace;
 
     this.camera = new THREE.PerspectiveCamera(
       15,
@@ -78,19 +87,23 @@ export class ThreeJSComponent {
 
     this.envMapGroup = new THREE.Group();
     this.scene.add(this.envMapGroup);
+
+    this.composer = new EffectComposer(this.renderer);
+    this.renderPass = new RenderPass(this.scene, this.camera);
+    this.composer.addPass(this.renderPass);
+
+    this.bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
+    this.composer.addPass(this.bloomPass);
+
     this.loadHDRI();
     this.addGUI();
     createLights(this.scene);
-
-
-
-
     window.addEventListener('resize', this.onWindowResize.bind(this));
     window.addEventListener('keydown', this.onKeyDown.bind(this));
     window.addEventListener('keyup', this.onKeyUp.bind(this));
 
     this.loadCarModel();
-    this.addFloor();
+    addFloor(this.scene);
     this.animate();
   }
 
@@ -112,6 +125,75 @@ export class ThreeJSComponent {
 
       this.updateEnvMapIntensity();
     });
+  }
+
+  private loadCarModel() {
+    loadModel(this.scene, 'https://d7to0drpifvba.cloudfront.net/3d-models/f-150v4/Ford_f150.gltf')
+      .then(({ model, animations }) => {
+        this.animationManager = new AnimationManager(model);
+        this.animationManager.loadAnimations(animations);
+        this.animationManager.setAnimationCompleteCallback(this.onAnimationComplete.bind(this));
+        this.playAllDoorsOpening();
+        this.playAllDoorsClosing();
+      })
+      .catch((error) => {
+        console.error('Error loading car model:', error);
+      });
+  }
+
+  public setCameraPosition(position: THREE.Vector3, target: THREE.Vector3) {
+    if (this.currentCamera === 'interior' && this.interiorCamera) {
+      this.interiorCamera.setCameraPosition(position, target);
+    } else {
+      this.camera.position.copy(position);
+      this.camera.lookAt(target);
+      if (this.controls) {
+        this.controls.target.copy(target);
+        this.controls.update();
+      }
+    }
+  }
+
+  public switchToInteriorCamera() {
+    this.currentCamera = 'interior';
+    if (this.interiorCamera) {
+      this.isInterior = true;
+      this.interiorCamera.resetCamera();
+      this.controls.enabled = false;
+      this.renderer.render(this.scene, this.interiorCamera.camera);
+    }
+  }
+
+  public switchToExteriorCamera() {
+    this.currentCamera = 'exterior';
+    if (this.controls) {
+      this.controls.enabled = true;
+    }
+    this.isInterior = false;
+    this.composer.render();
+  }
+  private animate() {
+    requestAnimationFrame(this.animate.bind(this));
+    const deltaTime = 0.10;
+    this.animationManager?.update(deltaTime);
+    this.handleCameraMovement(deltaTime);
+
+    if (this.currentCamera === 'exterior' && this.camera.position.y < 2) {
+      this.camera.position.y = 2;
+    }
+
+    this.renderer.setViewport(0, 0, window.innerWidth, window.innerHeight);
+    this.renderer.setScissor(0, 0, window.innerWidth, window.innerHeight);
+    this.renderer.setClearColor('#020202');
+    this.renderer.clear();
+
+    this.controls.update();
+    if (this.currentCamera === 'interior' && this.interiorCamera) {
+      this.renderer.render(this.scene, this.interiorCamera.camera);
+    } else {
+      this.controls.update();
+      this.renderer.render(this.scene, this.camera);
+    }
   }
 
   private updateEnvMapIntensity(): void {
@@ -159,7 +241,7 @@ export class ThreeJSComponent {
       this.updateColor(color);
     });
 
-    gui.add(envControls, 'Tone Mapping', [ 'Linear', 'ACESFilmic', 'Reinhard', 'Cineon' ]).onChange((value: string) => {
+    gui.add(envControls, 'Tone Mapping', ['Linear', 'ACESFilmic', 'Reinhard', 'Cineon']).onChange((value: string) => {
       this.updateToneMapping(value);
     });
 
@@ -211,81 +293,6 @@ export class ThreeJSComponent {
     }
   }
 
-  private addFloor(): void {
-    const loader = new GLTFLoader();
-    const floorPath = 'https://d7to0drpifvba.cloudfront.net/3d-models/f-150/base3/Base.gltf';
-
-    loader.load(floorPath, (gltf) => {
-      const floor = gltf.scene;
-
-      floor.scale.set(1.5, 1.5, 1.5);
-      floor.position.set(0, -0.5, 0);
-      floor.rotation.set(0, 0, 0);
-
-      floor.traverse((child) => {
-        if (child instanceof THREE.Mesh && child.material) {
-          const material = child.material as THREE.MeshPhysicalMaterial;
-
-          if (material.name === 'MT_BGBase_Main') {
-            material.color.set("#C4C4C4");
-            material.roughness = 0;
-            material.metalness = 0.8;
-            material.reflectivity = 0.9;
-            material.needsUpdate = true;
-            child.receiveShadow = true;
-          }
-
-          if (material.name === 'MT_BGBase_Emission') {
-            material.emissive.set(0x00ff00);
-            material.emissiveIntensity = 10;
-            material.needsUpdate = true;
-          }
-        }
-      });
-
-      this.scene.add(floor);
-    }, undefined, (error) => {
-      console.error('An error occurred while loading the GLTF model:', error);
-    });
-  }
-
-
-
-
-  private loadCarModel() {
-    loadModel(this.scene, 'https://d7to0drpifvba.cloudfront.net/3d-models/f-150v4/Ford_f150.gltf')
-      .then(({ model, animations }) => {
-        this.animationManager = new AnimationManager(model);
-        this.animationManager.loadAnimations(animations);
-        this.animationManager.setAnimationCompleteCallback(this.onAnimationComplete.bind(this));
-        this.playAllDoorsOpening();
-        this.playAllDoorsClosing(); 
-      })
-      .catch((error) => {
-        console.error('Error loading car model:', error);
-      });
-  }
-
-  private animate() {
-    requestAnimationFrame(this.animate.bind(this));
-
-    const deltaTime = 0.10;
-    this.animationManager?.update(deltaTime);
-
-    this.handleCameraMovement(deltaTime);
-
-    this.renderer.setViewport(0, 0, window.innerWidth, window.innerHeight);
-    this.renderer.setScissor(0, 0, window.innerWidth, window.innerHeight);
-    this.renderer.setClearColor('#020202');
-    this.renderer.clear();
-
-    if (this.currentCamera === 'interior' && this.interiorCamera) {
-      this.renderer.render(this.scene, this.interiorCamera.camera);
-    } else {
-      this.controls.update();
-      this.renderer.render(this.scene, this.camera);
-    }
-  }
 
 
   private handleCameraMovement(deltaTime: number) {
@@ -336,38 +343,6 @@ export class ThreeJSComponent {
       this.animationManager.playAnimation('All_doors_closing');
       this.isDoorOpen = false;
     }
-  }
-
-  public setCameraPosition(position: THREE.Vector3, target: THREE.Vector3) {
-    if (this.currentCamera === 'interior' && this.interiorCamera) {
-      this.interiorCamera.setCameraPosition(position, target);
-    } else {
-      this.camera.position.copy(position);
-      this.camera.lookAt(target);
-      if (this.controls) {
-        this.controls.target.copy(target);
-        this.controls.update();
-      }
-    }
-  }
-
-  public switchToInteriorCamera() {
-    this.currentCamera = 'interior';
-    if (this.interiorCamera) {
-      this.isInterior = true;
-      this.interiorCamera.resetCamera();
-      this.controls.enabled = false;
-      this.renderer.render(this.scene, this.interiorCamera.camera);
-    }
-  }
-
-  public switchToExteriorCamera() {
-    this.currentCamera = 'exterior';
-    if (this.controls) {
-      this.controls.enabled = true;
-    }
-    this.isInterior = false;
-    this.renderer.render(this.scene, this.camera);
   }
 
   public updateColor(colorCode: string) {
