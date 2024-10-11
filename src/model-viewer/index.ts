@@ -36,7 +36,7 @@ export class ThreeJSComponent {
   public isDoorOpen: boolean = false;
   public isInterior: boolean = false;
 
-  public exteriorCameraPosition = new THREE.Vector3(0, 5, 15);
+  public exteriorCameraPosition = new THREE.Vector3(0, 2, 15);
   public exteriorCameraTarget = new THREE.Vector3(0, 0, 0);
 
   constructor(canvasId: string) {
@@ -61,7 +61,7 @@ export class ThreeJSComponent {
       0.01,
       100
     );
-    this.camera.position.set(0, 5, 15);
+    this.camera.position.set(0, 2, 15);
     this.interiorCamera = new InteriorCamera(this.canvas, this.scene);
     this.pmremGenerator = new THREE.PMREMGenerator(this.renderer);
     this.pmremGenerator.compileEquirectangularShader();
@@ -80,7 +80,7 @@ export class ThreeJSComponent {
     this.envMapGroup = new THREE.Group();
     this.scene.add(this.envMapGroup);
     this.loadHDRI();
-    this.addGUI();
+    // this.addGUI();
     createLights(this.scene);
 
 
@@ -254,7 +254,7 @@ export class ThreeJSComponent {
 
 
   private loadCarModel() {
-    loadModel(this.scene, 'https://d7to0drpifvba.cloudfront.net/3d-models/f-f150v6/Ford_f150.gltf')
+    loadModel(this.scene, 'https://d7to0drpifvba.cloudfront.net/3d-models/f-f150v8/Ford_f150.gltf')
       .then(({ model, animations }) => {
         this.animationManager = new AnimationManager(model);
         this.animationManager.loadAnimations(animations);

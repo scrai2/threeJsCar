@@ -8,10 +8,10 @@ import { v4 } from "uuid";
 import { globals } from '../../model-viewer/globals';
 
 type ColorMapping = {
-  readonly blue: "#060DC4";
-  readonly lightingBlue: "#23438A";
-  readonly black: "#000000";
-  readonly red: "#c61c1c";
+  readonly blue: "#00489e";
+  readonly green: "#173531";
+  readonly black: "#0a0909";
+  readonly red: "#7a0009";
 };
 export const attachChatIntentEvents = async (
   query: string,
@@ -95,10 +95,10 @@ export const handleCarInfoQueryIntent = async (
   }
 };
 const colorMapping: ColorMapping = {
-  blue: "#060DC4",
-  lightingBlue: "#23438A",
-  black: "#000000",
-  red: "#c61c1c",
+  blue: "#00489e",
+  green: "#173531",
+  black: "#0a0909",
+  red: "#7a0009",
 };
 export const handleChangeCarColorIntent = (
   query: string,

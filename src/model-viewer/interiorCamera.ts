@@ -21,8 +21,9 @@ export class InteriorCamera {
     this.scene = scene;
 
     this.camera = new THREE.PerspectiveCamera(75, 1.8, 0.01, 100);
-    this.position = new THREE.Vector3(-0.2, 0.8, 0);
-    this.target = new THREE.Vector3(-5, -0.3, 0);
+    this.position = new THREE.Vector3(-0.1, 0.8, 0);
+
+    this.target = new THREE.Vector3(4, 0.3, 0);
 
     this.camera.position.copy(this.position);
     this.currentTarget = this.target.clone();
@@ -31,7 +32,7 @@ export class InteriorCamera {
     this.updateCamera();
 
     this.gui = new dat.GUI();
-    this.addGUIControls();
+    // this.addGUIControls();
 
     this.canvas.addEventListener('mousedown', this.onMouseDown.bind(this));
     // Change to document for mouse move
