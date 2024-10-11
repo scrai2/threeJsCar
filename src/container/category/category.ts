@@ -24,7 +24,7 @@ export const CATEGORIES: ICategory[] = [
       },
       {
         id: 2802,
-        name: "#23438A",
+        name: "#848484",
         isSelected: false,
         thumbnailPath: `${Icons}#lightingBlueIcon`,
       },
@@ -36,7 +36,7 @@ export const CATEGORIES: ICategory[] = [
       },
       {
         id: 2804,
-        name: "#5F0B0B",
+        name: "#c61c1c",
         isSelected: false,
         thumbnailPath: `${Icons}#redIcon`,
       },

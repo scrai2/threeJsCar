@@ -169,12 +169,10 @@ function updateCarGlassMaterial(
           sharedChromeMaterial = new THREE.MeshPhysicalMaterial({
             name: child.material.name,
             roughness: 0.0,
-            metalness: 0.2,
-            envMapIntensity: 0.2,
-            reflectivity: 1,
-            opacity: 1,
-            ior: 1,
-            sheen: 1,
+            metalness: 0,
+            envMapIntensity: 0,
+            reflectivity: 0,
+            opacity: 0.3,
             transparent: true
           });
         }
@@ -204,7 +202,7 @@ function updateCarMaterial(
         if (!sharedChromeMaterial) {
           sharedChromeMaterial = new THREE.MeshPhysicalMaterial({
             name: "Car_paint_Original",
-            color: "#2e6bde",
+            color: "#060DC4",
             roughness: 0.0,
             metalness: 0.2,
             envMapIntensity: 0.2,

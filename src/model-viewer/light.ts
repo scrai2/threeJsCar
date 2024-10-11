@@ -1,9 +1,9 @@
 import * as THREE from "three";
 import * as dat from 'dat.gui';
 
-function createLights(scene: THREE.Scene): { directionalLight: THREE.DirectionalLight } {
+function createLights(scene: THREE.Scene): { directionalLight: THREE.DirectionalLight, ambientLight: THREE.AmbientLight } {
 
-  const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+  const directionalLight = new THREE.DirectionalLight(0xffffff, 3.5);
   directionalLight.position.set(10, 10, 10); // Position the light above the scene
   directionalLight.castShadow = true; // Enable shadows
   directionalLight.shadow.mapSize.width = 2048; // Set shadow quality
@@ -12,6 +12,11 @@ function createLights(scene: THREE.Scene): { directionalLight: THREE.Directional
   directionalLight.shadow.camera.far = 50;
 
   scene.add(directionalLight);
+
+  const ambientLight = new THREE.AmbientLight(0xffffff, 1);
+  ambientLight.position.set(10, 10, 10); // Position the light above the scene
+
+  scene.add(ambientLight);
 
   const gui = new dat.GUI({ autoPlace: false }); // autoPlace false to manually position GUI
   
@@ -35,7 +40,7 @@ function createLights(scene: THREE.Scene): { directionalLight: THREE.Directional
   shadowFolder.add(directionalLight.shadow.camera, 'near', 0.1, 100).name('Shadow Camera Near');
   shadowFolder.add(directionalLight.shadow.camera, 'far', 10, 500).name('Shadow Camera Far');
 
-  return { directionalLight };
+  return { directionalLight, ambientLight };
 }
 
 export { createLights };

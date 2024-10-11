@@ -18,6 +18,7 @@ export class ThreeJSComponent {
   private isAnimationPlaying: boolean = false;
   private materialGuiControls: { [key: string]: any } = {};
   private materialType: string = 'MeshPhysicalMaterial';
+  private minCameraHeight: number = 2;
 
   private glassGuiControls: { [key: string]: any } = {};
   private glassMaterialName: string = 'MT_Glass';
@@ -213,13 +214,13 @@ export class ThreeJSComponent {
 
   private addFloor(): void {
     const loader = new GLTFLoader();
-    const floorPath = 'https://d7to0drpifvba.cloudfront.net/3d-models/f-150/base3/Base.gltf';
+    const floorPath = 'https://d7to0drpifvba.cloudfront.net/3d-models/f-f150v6/base2/Base.gltf';
 
     loader.load(floorPath, (gltf) => {
       const floor = gltf.scene;
 
       floor.scale.set(1.5, 1.5, 1.5);
-      floor.position.set(0, -0.5, 0);
+      floor.position.set(0, -0.750, 0);
       floor.rotation.set(0, 0, 0);
 
       floor.traverse((child) => {
@@ -253,7 +254,7 @@ export class ThreeJSComponent {
 
 
   private loadCarModel() {
-    loadModel(this.scene, 'https://d7to0drpifvba.cloudfront.net/3d-models/f-f150v5/Ford_f150.gltf')
+    loadModel(this.scene, 'https://d7to0drpifvba.cloudfront.net/3d-models/f-f150v6/Ford_f150.gltf')
       .then(({ model, animations }) => {
         this.animationManager = new AnimationManager(model);
         this.animationManager.loadAnimations(animations);
@@ -278,6 +279,9 @@ export class ThreeJSComponent {
     this.renderer.setScissor(0, 0, window.innerWidth, window.innerHeight);
     this.renderer.setClearColor('#020202');
     this.renderer.clear();
+    if (this.currentCamera === 'exterior' && this.camera.position.y < 2) {
+      this.camera.position.y = 2;
+    }
 
     if (this.currentCamera === 'interior' && this.interiorCamera) {
       this.renderer.render(this.scene, this.interiorCamera.camera);

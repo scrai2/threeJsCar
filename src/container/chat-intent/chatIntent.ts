@@ -11,7 +11,7 @@ type ColorMapping = {
   readonly blue: "#060DC4";
   readonly lightingBlue: "#23438A";
   readonly black: "#000000";
-  readonly red: "#5F0B0B";
+  readonly red: "#c61c1c";
 };
 export const attachChatIntentEvents = async (
   query: string,
@@ -98,7 +98,7 @@ const colorMapping: ColorMapping = {
   blue: "#060DC4",
   lightingBlue: "#23438A",
   black: "#000000",
-  red: "#5F0B0B",
+  red: "#c61c1c",
 };
 export const handleChangeCarColorIntent = (
   query: string,
