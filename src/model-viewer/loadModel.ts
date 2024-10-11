@@ -1,15 +1,15 @@
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
+import { GUI } from 'dat.gui';
 
 export function loadModel(
-  scene: THREE.Scene, 
-  modelPath: string, 
+  scene: THREE.Scene,
+  modelPath: string,
   position: THREE.Vector3 = new THREE.Vector3(0, -0.750, 0),
   scale: THREE.Vector3 = new THREE.Vector3(1, 1, 1),
   rotation: THREE.Euler = new THREE.Euler(0, 0, 0)
 ): Promise<{ model: THREE.Group; animations: THREE.AnimationClip[] }> {
-  
+
   const loader = new GLTFLoader();
 
   return new Promise((resolve, reject) => {
@@ -20,7 +20,7 @@ export function loadModel(
         centerAndScale(model, position, rotation, scale);
         model.traverse((child) => {
           if (child instanceof THREE.Mesh) {
-            child.castShadow = true; 
+            child.castShadow = true;
             child.receiveShadow = true;
           }
         });
@@ -33,16 +33,18 @@ export function loadModel(
         }
 
         updateChromeMaterial(model, {
-          color: "#C0C0C0", 
-          envMapIntensity: 2.5, 
+          color: "#C0C0C0",
+          envMapIntensity: 1,
           metalness: 1,
-          roughness: 0.1,
+          roughness: 0.0,
           clearcoat: 2.5,
           specularIntensity: 1.5,
         });
         updateCarMaterial(model);
-
         toggleAlloyMeshesVisibility(model);
+
+        // Initialize GUI controls
+        initializeGUI(model);
 
         resolve({ model, animations: gltf.animations });
       },
@@ -78,7 +80,45 @@ function updateChromeMaterial(
   model: THREE.Group,
   options: ChromeMaterialOptions = {}
 ): void {
-  const chromedMaterialNames = ["chrome", "back_chrom"];
+  const chromedMaterialNames = ["back_chrom"];
+  let sharedChromeMaterial: THREE.MeshPhysicalMaterial | null = null;
+
+  model.traverse((child) => {
+    if (child instanceof THREE.Mesh && child.material) {
+      child.castShadow = true;
+      child.receiveShadow = true;
+
+      // Check if the material is one we want to update
+      if (chromedMaterialNames.includes(child.material.name)) {
+        // Create or reuse the shared material
+        if (!sharedChromeMaterial) {
+          sharedChromeMaterial = new THREE.MeshPhysicalMaterial({
+            name: "back_chrom",
+            color: options.color || "#dadada",
+            map: child.material.map,
+            envMapIntensity: options.envMapIntensity || 1,
+            metalness: options.metalness || 1,
+            roughness: options.roughness || 0.0,
+            clearcoat: options.clearcoat || 3,
+            specularIntensity: options.specularIntensity || 3,
+          });
+        }
+
+        // Assign the shared material to the child
+        child.material = sharedChromeMaterial;
+        child.material.needsUpdate = true;
+      }
+    }
+  });
+  updateCarGlassMaterial(model);
+  updateAlloyChromeMaterial(model);
+}
+
+function updateAlloyChromeMaterial(
+  model: THREE.Group,
+  options: ChromeMaterialOptions = {}
+): void {
+  const chromedMaterialNames = ["chrome"];
   let sharedChromeMaterial: THREE.MeshPhysicalMaterial | null = null;
 
   model.traverse((child) => {
@@ -92,11 +132,11 @@ function updateChromeMaterial(
         if (!sharedChromeMaterial) {
           sharedChromeMaterial = new THREE.MeshPhysicalMaterial({
             name: "chrome",
-            color: options.color || "#F5F5F8",
+            color: options.color || "#dadada",
             map: child.material.map,
-            envMapIntensity: options.envMapIntensity || 2,
+            envMapIntensity: options.envMapIntensity || 1,
             metalness: options.metalness || 1,
-            roughness: options.roughness || 0.15,
+            roughness: options.roughness || 0.0,
             clearcoat: options.clearcoat || 3,
             specularIntensity: options.specularIntensity || 3,
           });
@@ -108,8 +148,44 @@ function updateChromeMaterial(
       }
     }
   });
+  updateCarGlassMaterial(model);
 }
 
+function updateCarGlassMaterial(
+  model: THREE.Group,
+): void {
+  const chromedMaterialNames = ["GlassClear", "MT_Glass", "glass_dark"];
+  let sharedChromeMaterial: THREE.MeshPhysicalMaterial | null = null;
+
+  model.traverse((child) => {
+    if (child instanceof THREE.Mesh && child.material) {
+      child.castShadow = true;
+      child.receiveShadow = true;
+
+      // Check if the material is one we want to update
+      if (chromedMaterialNames.includes(child.material.name)) {
+        // Create or reuse the shared material
+        if (!sharedChromeMaterial) {
+          sharedChromeMaterial = new THREE.MeshPhysicalMaterial({
+            name: child.material.name,
+            roughness: 0.0,
+            metalness: 0.2,
+            envMapIntensity: 0.2,
+            reflectivity: 1,
+            opacity: 1,
+            ior: 1,
+            sheen: 1,
+            transparent: true
+          });
+        }
+
+        // Assign the shared material to the child
+        child.material = sharedChromeMaterial;
+        child.material.needsUpdate = true;
+      }
+    }
+  });
+}
 
 function updateCarMaterial(
   model: THREE.Group,
@@ -128,13 +204,11 @@ function updateCarMaterial(
         if (!sharedChromeMaterial) {
           sharedChromeMaterial = new THREE.MeshPhysicalMaterial({
             name: "Car_paint_Original",
-            color: "#060DC4"
-            // map: child.material.map,
-            // envMapIntensity: options.envMapIntensity || 2,
-            // metalness: options.metalness || 1,
-            // roughness: options.roughness || 0.15,
-            // clearcoat: options.clearcoat || 3,
-            // specularIntensity: options.specularIntensity || 3,
+            color: "#2e6bde",
+            roughness: 0.0,
+            metalness: 0.2,
+            envMapIntensity: 0.2,
+            reflectivity: 1
           });
         }
 
@@ -146,18 +220,173 @@ function updateCarMaterial(
   });
 }
 
+type AlloyMeshNames = "SM-Aloy-Low_01" | "SM_Alloy_002" | "SM_Alloy_003" | "SM_Alloy_004";
+
 function toggleAlloyMeshesVisibility(model: THREE.Group): void {
-  const alloyMeshNames = ["SM-Aloy-Low_01", "SM_Alloy_002", "SM_Alloy_003", "SM_Alloy_004"];
-  const visibleMeshName = "SM-Aloy-Low_01";
+  const alloyMeshNames: AlloyMeshNames[] = ["SM-Aloy-Low_01", "SM_Alloy_002", "SM_Alloy_003", "SM_Alloy_004"];
+  const visibleMeshName: AlloyMeshNames = "SM-Aloy-Low_01";
 
   model.traverse((child) => {
     if (child instanceof THREE.Mesh || child instanceof THREE.Group) {
-      if (alloyMeshNames.includes(child.name)) {
-       
+      if (alloyMeshNames.includes(child.name as AlloyMeshNames)) {
         child.visible = (child.name === visibleMeshName);
       }
     }
   });
 }
 
+// GUI initialization function
+// GUI initialization function
+function initializeGUI(model: THREE.Group): void {
+  const gui = new GUI();
+
+  // Control for Alloy Meshes Visibility
+  const alloyFolder = gui.addFolder('Alloy Visibility');
+  const alloyMeshesVisibility: Record<AlloyMeshNames, boolean> = {
+    "SM-Aloy-Low_01": true,
+    "SM_Alloy_002": false,
+    "SM_Alloy_003": false,
+    "SM_Alloy_004": false
+  };
+
+  Object.keys(alloyMeshesVisibility).forEach(meshName => {
+    alloyFolder.add(alloyMeshesVisibility, meshName as AlloyMeshNames).onChange((value) => {
+      model.traverse((child) => {
+        if (child instanceof THREE.Mesh || child instanceof THREE.Group) {
+          if (child.name === meshName) {
+            child.visible = value;
+          }
+        }
+      });
+    });
+  });
+
+  alloyFolder.open();
+
+  // Glass Material Options
+  const glassMaterialOptions = {
+    roughness: 0.0,
+    metalness: 0.2,
+    envMapIntensity: 0.2,
+    opacity: 1,
+    transparent: true, // Add transparent option
+  };
+
+  const glassFolder = gui.addFolder('Glass Material');
+
+  glassFolder.add(glassMaterialOptions, 'roughness', 0, 1).onChange((value) => {
+    model.traverse((child) => {
+      if (child instanceof THREE.Mesh && ["GlassClear", "MT_Glass", "glass_dark"].includes(child.material.name)) {
+        child.material.roughness = value;
+        child.material.needsUpdate = true;
+      }
+    });
+  });
+
+  glassFolder.add(glassMaterialOptions, 'metalness', 0, 1).onChange((value) => {
+    model.traverse((child) => {
+      if (child instanceof THREE.Mesh && ["GlassClear", "MT_Glass", "glass_dark"].includes(child.material.name)) {
+        child.material.metalness = value;
+        child.material.needsUpdate = true;
+      }
+    });
+  });
+
+  glassFolder.add(glassMaterialOptions, 'envMapIntensity', 0, 1).onChange((value) => {
+    model.traverse((child) => {
+      if (child instanceof THREE.Mesh && ["GlassClear", "MT_Glass", "glass_dark"].includes(child.material.name)) {
+        child.material.envMapIntensity = value;
+        child.material.needsUpdate = true;
+      }
+    });
+  });
+
+  glassFolder.add(glassMaterialOptions, 'opacity', 0, 1).onChange((value) => {
+    model.traverse((child) => {
+      if (child instanceof THREE.Mesh && ["GlassClear", "MT_Glass", "glass_dark"].includes(child.material.name)) {
+        child.material.opacity = value;
+        child.material.needsUpdate = true;
+      }
+    });
+  });
+
+  glassFolder.add(glassMaterialOptions, 'transparent').onChange((value) => {
+    model.traverse((child) => {
+      if (child instanceof THREE.Mesh && ["GlassClear", "MT_Glass", "glass_dark"].includes(child.material.name)) {
+        child.material.transparent = value;
+        child.material.needsUpdate = true;
+      }
+    });
+  });
+
+  glassFolder.open();
+
+  // Alloy Chrome Material Options
+  const alloyMaterialOptions = {
+    roughness: 0.0,
+    metalness: 1.0,
+    envMapIntensity: 1.0,
+    clearcoat: 1.0,
+    opacity: 1,
+    transparent: false,
+  };
+
+  const alloyFolder2 = gui.addFolder('Alloy Chrome Material');
+
+  alloyFolder2.add(alloyMaterialOptions, 'roughness', 0, 1).onChange((value) => {
+    model.traverse((child) => {
+      if (child instanceof THREE.Mesh && ["back_chrom", "chrome"].includes(child.material.name)) {
+        child.material.roughness = value;
+        child.material.needsUpdate = true;
+      }
+    });
+  });
+
+  alloyFolder2.add(alloyMaterialOptions, 'metalness', 0, 1).onChange((value) => {
+    model.traverse((child) => {
+      if (child instanceof THREE.Mesh && ["back_chrom", "chrome"].includes(child.material.name)) {
+        child.material.metalness = value;
+        child.material.needsUpdate = true;
+      }
+    });
+  });
+
+  alloyFolder2.add(alloyMaterialOptions, 'envMapIntensity', 0, 5).onChange((value) => {
+    model.traverse((child) => {
+      if (child instanceof THREE.Mesh && ["back_chrom", "chrome"].includes(child.material.name)) {
+        child.material.envMapIntensity = value;
+        child.material.needsUpdate = true;
+      }
+    });
+  });
+
+  alloyFolder2.add(alloyMaterialOptions, 'clearcoat', 0, 1).onChange((value) => {
+    model.traverse((child) => {
+      if (child instanceof THREE.Mesh && ["back_chrom", "chrome"].includes(child.material.name)) {
+        child.material.clearcoat = value;
+        child.material.needsUpdate = true;
+      }
+    });
+  });
+
+  alloyFolder2.add(alloyMaterialOptions, 'opacity', 0, 1).onChange((value) => {
+    model.traverse((child) => {
+      if (child instanceof THREE.Mesh && ["back_chrom", "chrome"].includes(child.material.name)) {
+        child.material.opacity = value;
+        child.material.needsUpdate = true;
+      }
+    });
+  });
+
+  alloyFolder2.add(alloyMaterialOptions, 'transparent').onChange((value) => {
+    model.traverse((child) => {
+      if (child instanceof THREE.Mesh && ["back_chrom", "chrome"].includes(child.material.name)) {
+        child.material.transparent = value;
+        child.material.needsUpdate = true;
+      }
+    });
+  });
+
+  alloyFolder2.open();
+}
 
