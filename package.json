@@ -37,7 +37,9 @@
     "dotenv": "^16.4.5",
     "gsap": "^3.12.5",
     "mini-css-extract-plugin": "^2.7.6",
+    "postprocessing": "^6.36.3",
     "three": "^0.158.0",
+    "three-stdlib": "^2.33.0",
     "uuid": "^9.0.1"
   }
 }

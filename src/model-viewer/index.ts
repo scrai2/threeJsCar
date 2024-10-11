@@ -7,6 +7,81 @@ import { InteriorCamera } from './interiorCamera';
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader';
 import { GUI } from 'dat.gui';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
+import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass';
+
+
+const colorCorrectionShader = {
+  uniforms: {
+    tDiffuse: { value: null },
+    brightness: { value: 0 },
+    contrast: { value: 1 },
+    saturation: { value: 1 },
+    temperature: { value: 0 },  // Added temperature control
+    tint: { value: 0 },         // Added tint control
+  },
+  vertexShader: `
+    varying vec2 vUv;
+    void main() {
+      vUv = uv;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }
+  `,
+  fragmentShader: `
+    uniform sampler2D tDiffuse;
+    uniform float brightness;
+    uniform float contrast;
+    uniform float saturation;
+    uniform float temperature;  // Added temperature uniform
+    uniform float tint;         // Added tint uniform
+    varying vec2 vUv;
+
+    vec3 applySaturation(vec3 color, float saturationFactor) {
+      float intensity = dot(color, vec3(0.2126, 0.7152, 0.0722));
+      return mix(vec3(intensity), color, saturationFactor);
+    }
+
+    vec3 applyTemperature(vec3 color, float temp) {
+      // Increase red for warmer temperature, blue for cooler
+      color.r += temp;
+      color.b -= temp;
+      return color;
+    }
+
+    vec3 applyTint(vec3 color, float tintValue) {
+      // Adjust the green-magenta balance
+      color.g += tintValue;
+      color.b -= tintValue;
+      return color;
+    }
+
+    void main() {
+      vec4 texel = texture2D(tDiffuse, vUv);
+
+      // Apply brightness
+      texel.rgb += brightness;
+
+      // Apply contrast
+      texel.rgb = (texel.rgb - 0.5) * contrast + 0.5;
+
+      // Apply saturation
+      texel.rgb = applySaturation(texel.rgb, saturation);
+
+      // Apply temperature
+      texel.rgb = applyTemperature(texel.rgb, temperature);
+
+      // Apply tint
+      texel.rgb = applyTint(texel.rgb, tint);
+
+      gl_FragColor = texel;
+    }
+  `,
+};
+
+
+
+
 
 export class ThreeJSComponent {
   private scene: THREE.Scene;
@@ -18,6 +93,7 @@ export class ThreeJSComponent {
   private isAnimationPlaying: boolean = false;
   private materialGuiControls: { [key: string]: any } = {};
   private materialType: string = 'MeshPhysicalMaterial';
+  private composer: EffectComposer;
 
   private glassGuiControls: { [key: string]: any } = {};
   private glassMaterialName: string = 'MT_Glass';
@@ -82,9 +158,12 @@ export class ThreeJSComponent {
     this.loadHDRI();
     this.addGUI();
     createLights(this.scene);
+    this.composer = new EffectComposer(this.renderer);
+    const renderPass = new RenderPass(this.scene, this.camera);
+    this.composer.addPass(renderPass);
 
-
-
+    const colorCorrectionPass = new ShaderPass(colorCorrectionShader);
+    this.composer.addPass(colorCorrectionPass);
 
     window.addEventListener('resize', this.onWindowResize.bind(this));
     window.addEventListener('keydown', this.onKeyDown.bind(this));
@@ -135,39 +214,61 @@ export class ThreeJSComponent {
       'Exposure': 1.5,
       'Env Map Rotation': 0,
       'Enable Env Map': true,
-      'Car Paint Color': '#ffffff',
-      'Tone Mapping': 'ACESFilmic',
+      'Brightness': 0.0,
+      'Contrast': 1.0,
+      'Saturation': 1.0,
+      'Temperature': 0.0,  // New control for temperature
+      'Tint': 0.0,         // New control for tint
     };
-
+  
     gui.add(envControls, 'Env Map Intensity', 0, 2, 0.01).onChange((value: number) => {
       this.updateHDRILightingIntensity(value);
     });
-
+  
     gui.add(envControls, 'Exposure', 0, 2, 0.01).onChange((value: number) => {
       this.updateRendererExposure(value);
     });
-
+  
     gui.add(envControls, 'Env Map Rotation', 0, Math.PI * 2, 0.01).onChange((value: number) => {
       this.envMapRotation = value;
       this.envMapGroup.rotation.set(0, value, 0);
     });
-
+  
     gui.add(envControls, 'Enable Env Map').onChange((enabled: boolean) => {
       this.scene.environment = enabled ? this.envMap : null;
       this.scene.background = enabled ? this.envMap : null;
     });
-
-    gui.addColor(envControls, 'Car Paint Color').onChange((color: string) => {
-      this.updateColor(color);
+  
+    gui.add(envControls, 'Brightness', -1, 1, 0.01).onChange((value: number) => {
+      this.updatePostProcessing(value, 'brightness');
     });
-
-    gui.add(envControls, 'Tone Mapping', [ 'Linear', 'ACESFilmic', 'Reinhard', 'Cineon' ]).onChange((value: string) => {
-      this.updateToneMapping(value);
+  
+    gui.add(envControls, 'Contrast', 0, 2, 0.01).onChange((value: number) => {
+      this.updatePostProcessing(value, 'contrast');
     });
-
-    gui.domElement.style.position = 'absolute';
-    gui.domElement.style.top = '500px';
-    gui.domElement.style.right = '10px';
+  
+    gui.add(envControls, 'Saturation', 0, 2, 0.01).onChange((value: number) => {
+      this.updatePostProcessing(value, 'saturation');
+    });
+  
+    // Add GUI control for temperature
+    gui.add(envControls, 'Temperature', -1, 1, 0.01).onChange((value: number) => {
+      this.updatePostProcessing(value, 'temperature');
+    });
+  
+    // Add GUI control for tint
+    gui.add(envControls, 'Tint', -1, 1, 0.01).onChange((value: number) => {
+      this.updatePostProcessing(value, 'tint');
+    });
+  }
+  
+  private updatePostProcessing(value: number, type: string): void {
+    const colorCorrectionPass = this.composer.passes[1] as ShaderPass;
+    if (type === 'brightness') colorCorrectionPass.uniforms.brightness.value = value;
+    if (type === 'contrast') colorCorrectionPass.uniforms.contrast.value = value;
+    if (type === 'saturation') colorCorrectionPass.uniforms.saturation.value = value;
+    if (type === 'temperature') colorCorrectionPass.uniforms.temperature.value = value;  // Update temperature
+    if (type === 'tint') colorCorrectionPass.uniforms.tint.value = value;                // Update tint
   }
 
   private updateRendererExposure(exposure: number): void {
@@ -288,10 +389,10 @@ export class ThreeJSComponent {
     this.renderer.clear();
 
     if (this.currentCamera === 'interior' && this.interiorCamera) {
-      this.renderer.render(this.scene, this.interiorCamera.camera);
+      this.composer.render();
     } else {
       this.controls.update();
-      this.renderer.render(this.scene, this.camera);
+      this.composer.render();
     }
   }
 
