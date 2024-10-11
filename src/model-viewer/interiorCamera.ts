@@ -20,10 +20,10 @@ export class InteriorCamera {
     this.canvas = canvas;
     this.scene = scene;
 
-    this.camera = new THREE.PerspectiveCamera(75, 1.8, 0.01, 100);
+    this.camera = new THREE.PerspectiveCamera(80, 1.8, 0.01, 100);
     this.position = new THREE.Vector3(-0.1, 0.8, 0);
 
-    this.target = new THREE.Vector3(4, 0.3, 0);
+    this.target = new THREE.Vector3(-0.5903, 0.7762, 0.871226);
 
     this.camera.position.copy(this.position);
     this.currentTarget = this.target.clone();
@@ -46,7 +46,7 @@ export class InteriorCamera {
   }
 
   public resizeCamera() {
-    this.camera.aspect = (window.innerWidth * 0.75) / window.innerHeight;
+    this.camera.aspect = (window.innerWidth ) / window.innerHeight;
     this.camera.updateProjectionMatrix();
   }
 
@@ -72,7 +72,6 @@ export class InteriorCamera {
   private onMouseDown(event: MouseEvent) {
     this.isDragging = true;
     this.prevMousePosition = { x: event.clientX, y: event.clientY };
-    // Optionally hide the cursor while dragging for a cleaner experience
     this.canvas.style.cursor = 'none'; 
   }
 
@@ -89,12 +88,10 @@ export class InteriorCamera {
     const direction = new THREE.Vector3().subVectors(this.desiredTarget, this.position).normalize();
 
     if (Math.abs(deltaY) > Math.abs(deltaX)) {
-      // Vertical movement (up/down) - Simulate human head movement (limited range)
       const newY = direction.y - deltaY * rotationSpeed;
       const clampedY = THREE.MathUtils.clamp(newY, -this.maxVerticalAngle, this.maxVerticalAngle);
       direction.y = clampedY;
     } else {
-      // Horizontal movement (left/right) - Full 360 degrees
       let horizontalAngle = Math.atan2(direction.x, direction.z);
       horizontalAngle -= deltaX * rotationSpeed;
 
@@ -114,6 +111,7 @@ export class InteriorCamera {
 
   public animate() {
     requestAnimationFrame(() => this.animate());
+    console.log(`Target Position: x=${this.currentTarget.x}, y=${this.currentTarget.y}, z=${this.currentTarget.z}`);
     this.updateCamera();
   }
 
@@ -121,25 +119,5 @@ export class InteriorCamera {
     this.setCameraPosition(this.position, this.target);
   }
 
-  private addGUIControls() {
-    const cameraFolder = this.gui.addFolder('Camera Properties');
 
-    cameraFolder.add(this.camera, 'fov', 1, 150, 1).onChange(() => {
-      this.camera.updateProjectionMatrix(); 
-    });
-
-    cameraFolder.add(this.camera, 'near', 0.01, 10, 0.01).onChange(() => {
-      this.camera.updateProjectionMatrix(); 
-    });
-
-    cameraFolder.add(this.camera, 'far', 10, 1000, 1).onChange(() => {
-      this.camera.updateProjectionMatrix(); 
-    });
-
-    cameraFolder.add(this.camera, 'aspect', 0.1, 3, 0.01).onChange(() => {
-      this.camera.updateProjectionMatrix(); 
-    });
-
-    cameraFolder.open();
-  }
 }

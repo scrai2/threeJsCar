@@ -7,7 +7,7 @@ export function loadModel(
   modelPath: string,
   position: THREE.Vector3 = new THREE.Vector3(0, -0.750, 0),
   scale: THREE.Vector3 = new THREE.Vector3(1, 1, 1),
-  rotation: THREE.Euler = new THREE.Euler(0, 2, 0)
+  rotation: THREE.Euler = new THREE.Euler(0, 1, 0)
 ): Promise<{ model: THREE.Group; animations: THREE.AnimationClip[] }> {
 
   const loader = new GLTFLoader();
