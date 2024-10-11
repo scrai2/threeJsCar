@@ -20,10 +20,10 @@ export class InteriorCamera {
     this.canvas = canvas;
     this.scene = scene;
 
-    this.camera = new THREE.PerspectiveCamera(80, 1.8, 0.01, 100);
+    this.camera = new THREE.PerspectiveCamera(75, 1.8, 0.01, 100);
     this.position = new THREE.Vector3(-0.1, 0.8, 0);
 
-    this.target = new THREE.Vector3(-0.5903, 0.7762, 0.871226);
+    this.target = new THREE.Vector3(-0.6223, 0.617, 0.8330);
 
     this.camera.position.copy(this.position);
     this.currentTarget = this.target.clone();
@@ -111,7 +111,6 @@ export class InteriorCamera {
 
   public animate() {
     requestAnimationFrame(() => this.animate());
-    console.log(`Target Position: x=${this.currentTarget.x}, y=${this.currentTarget.y}, z=${this.currentTarget.z}`);
     this.updateCamera();
   }
 
