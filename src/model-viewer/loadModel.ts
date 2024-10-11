@@ -335,7 +335,7 @@ function initializeGUI(model: THREE.Group): void {
 
   alloyFolder2.add(alloyMaterialOptions, 'roughness', 0, 1).onChange((value) => {
     model.traverse((child) => {
-      if (child instanceof THREE.Mesh && ["back_chrom", "chrome"].includes(child.material.name)) {
+      if (child instanceof THREE.Mesh && ["back_chrom", "chrome_new"].includes(child.material.name)) {
         child.material.roughness = value;
         child.material.needsUpdate = true;
       }
