@@ -2,7 +2,7 @@ import axios from "axios";
 
 
 const defaultOptions = {
-  baseURL: 'https://vyom-api.kubepipe.in',
+  baseURL: 'https://vyom-api.exsq.ai',
   headers: {
     "Content-Type": "application/json",
   },

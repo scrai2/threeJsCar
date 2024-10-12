@@ -390,13 +390,19 @@ export class ThreeJSComponent {
 
   public toggleAlloyMeshesVisibility(visibleMeshName: string): void {
     const alloyMeshNames = ["SM-Aloy-Low_01", "SM_Alloy_002", "SM_Alloy_003", "SM_Alloy_004"];
-
+  
     this.animationManager?.model.traverse((child) => {
       if (child instanceof THREE.Mesh || child instanceof THREE.Group) {
+        // Check if the child name is in the alloy mesh names list
         if (alloyMeshNames.includes(child.name)) {
+          // Set visibility to true only for the specified visibleMeshName, others will be hidden
           child.visible = (child.name === visibleMeshName);
         }
       }
     });
   }
+
+
+  
+  
 }

@@ -68,6 +68,7 @@ export const initializeSwatches = (
       if (optionName) {
         // Check if optionName is in the wheelOptions array
         if (wheelOptions.includes(optionName)) {
+          
           component.toggleAlloyMeshesVisibility(optionName); // Change the wheel if the option matches
           console.log(`Wheel option clicked: ${optionName}`);
         } else {

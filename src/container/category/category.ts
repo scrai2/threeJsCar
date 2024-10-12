@@ -19,14 +19,14 @@ export const CATEGORIES: ICategory[] = [
       {
         id: 2801,
         name: "#00489e",
-        isSelected: true,
+        isSelected: false,
         thumbnailPath: `${Icons}#darkblueIcon`,
       },
       {
         id: 2802,
         name: "#173531",
         isSelected: false,
-        thumbnailPath: `${Icons}#lightingBlueIcon`,
+        thumbnailPath: `${Icons}#green`,
       },
       {
         id: 2803,
