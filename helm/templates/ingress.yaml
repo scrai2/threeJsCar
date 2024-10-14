@@ -1,7 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name:  {{ include "vyom-frontend.fullname" . }}-ingress
+  name:  {{ include "vyom-frontend-v2.fullname" . }}-ingress
   namespace: {{ .Release.Namespace }}
   annotations:
     nginx.ingress.kubernetes.io/proxy-body-size: "0"
@@ -10,7 +10,7 @@ spec:
   tls:
   - hosts:
     - {{ .Values.ingress.host }}
-    secretName:  {{ include "vyom-frontend.fullname" . }}-tls
+    secretName:  {{ include "vyom-frontend-v2.fullname" . }}-tls
   ingressClassName: nginx
   rules:
   - host: {{ .Values.ingress.host }}
@@ -20,7 +20,7 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name:  {{ include "vyom-frontend.fullname" . }}-service  
+            name:  {{ include "vyom-frontend-v2.fullname" . }}-service  
             port:
               number: 3000  
 
