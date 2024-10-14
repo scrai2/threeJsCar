@@ -150,20 +150,23 @@ export const handleDoorOpenIntent = (
   clearChatInputField();
 
   const doorCheck = globals.threeJSComponent?.getCurrentIsDoorStatus();
+  console.log("Current door status:", doorCheck);
 
-  if (query.toLowerCase().includes("open")) { 
-    if (doorCheck) {  
+  if (query.toLowerCase().includes("open")) {
+    if (doorCheck) {  // Door is already open
       intentResponse.message = "Door is already open";
-    } else {
+    } else {  // Door is closed
       globals.threeJSComponent?.playAllDoorsOpening();
       intentResponse.message = "Opening the doors";
+      globals.threeJSComponent?.setDoorStatus(true)
     }
-  } else if (query.toLowerCase().includes("close")) { 
-    if (!doorCheck) {
+  } else if (query.toLowerCase().includes("close")) {
+    if (!doorCheck) {  // Door is already closed
       intentResponse.message = "Door is already closed";
-    } else {
+    } else {  // Door is open
       globals.threeJSComponent?.playAllDoorsClosing();
       intentResponse.message = "Closing the doors";
+      globals.threeJSComponent?.setDoorStatus(false);
     }
   } else {
     intentResponse.message = "I don't understand the door command.";
