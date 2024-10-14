@@ -3,8 +3,7 @@ replicaCount: 1
 image:
   repository: garagedev.azurecr.io/vyom-frontend
   pullPolicy: IfNotPresent
-  tag: "0.0.6"
-
+  tag: "0.0.7"
 imagePullSecrets: []
 nameOverride: "vyom-frontend"
 fullnameOverride: ""
