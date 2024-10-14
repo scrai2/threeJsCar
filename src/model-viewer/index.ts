@@ -5,7 +5,6 @@ import { AnimationManager } from '../entity-models/customAnimation';
 import { createLights } from './light';
 import { InteriorCamera } from './interiorCamera';
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader';
-import { GUI } from 'dat.gui';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 
 export class ThreeJSComponent {
@@ -13,13 +12,17 @@ export class ThreeJSComponent {
   private camera: THREE.PerspectiveCamera;
   private renderer: THREE.WebGLRenderer;
   private controls: OrbitControls;
+  private currentProgress: number = 0;
   private animationManager: AnimationManager | null = null;
   private canvas: HTMLCanvasElement;
   private isAnimationPlaying: boolean = false;
   private materialGuiControls: { [key: string]: any } = {};
   private materialType: string = 'MeshPhysicalMaterial';
   private minCameraHeight: number = 2;
-
+  private loaderElement: HTMLElement | null = null;
+  private visLoaderElement: HTMLElement | null = null;
+  private progressBarElement: HTMLElement | null = null;
+  private progressTextElement: HTMLElement | null = null;
   private glassGuiControls: { [key: string]: any } = {};
   private glassMaterialName: string = 'MT_Glass';
 
@@ -36,13 +39,16 @@ export class ThreeJSComponent {
   public isDoorOpen: boolean = false;
   public isInterior: boolean = false;
 
-  public exteriorCameraPosition = new THREE.Vector3(0, 5, 15);
+  public exteriorCameraPosition = new THREE.Vector3(0, 2, 15);
   public exteriorCameraTarget = new THREE.Vector3(0, 0, 0);
 
   constructor(canvasId: string) {
     this.canvas = document.getElementById(canvasId) as HTMLCanvasElement;
     if (!this.canvas) throw new Error(`Canvas element with id ${canvasId} not found`);
-
+    this.loaderElement = document.getElementById('loader-container'); // Loading screen container
+    this.visLoaderElement = document.querySelector('.vis_container-loader');
+    this.progressBarElement = document.getElementById('progress-bar');
+    this.progressTextElement = document.getElementById('progress-text');
 
     this.scene = new THREE.Scene();
     this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, antialias: true });
@@ -61,7 +67,7 @@ export class ThreeJSComponent {
       0.01,
       100
     );
-    this.camera.position.set(0, 5, 15);
+    this.camera.position.set(0, 2, 15);
     this.interiorCamera = new InteriorCamera(this.canvas, this.scene);
     this.pmremGenerator = new THREE.PMREMGenerator(this.renderer);
     this.pmremGenerator.compileEquirectangularShader();
@@ -79,39 +85,93 @@ export class ThreeJSComponent {
 
     this.envMapGroup = new THREE.Group();
     this.scene.add(this.envMapGroup);
-    this.loadHDRI();
-    this.addGUI();
     createLights(this.scene);
-
-
-
-
+    
+    
+    
+    
     window.addEventListener('resize', this.onWindowResize.bind(this));
     window.addEventListener('keydown', this.onKeyDown.bind(this));
     window.addEventListener('keyup', this.onKeyUp.bind(this));
-
-    this.loadCarModel();
-    this.addFloor();
+    
     this.animate();
+    this.loadAssets();
   }
+
+  private loadAssets(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.loadHDRI()
+        .then(() => {
+          this.updateLoaderProgress(40); // HDRI loaded
+          return this.addFloor();
+        })
+        .then(() => {
+          this.updateLoaderProgress(70); // Floor loaded
+          return this.loadCarModel();
+        })
+        .then(() => {
+          this.updateLoaderProgress(100); // Car model loaded
+          resolve();
+        })
+        .catch((error) => {
+          console.error('Error loading assets:', error);
+          reject(error);
+        });
+    });
+  }
+
+
+  private updateLoaderProgress(percentage: number): void {
+    this.currentProgress = percentage;
+
+    if (this.visLoaderElement) {
+      const progressDegree = (percentage / 100) * 360; 
+      this.visLoaderElement.style.setProperty('--progress', `${progressDegree}deg`);
+      this.visLoaderElement.setAttribute('data-progress', `${Math.floor(percentage)}`);
+
+      if (this.progressTextElement) {
+        this.progressTextElement.innerText = `${Math.floor(percentage)}%`;
+      }
+    }
+
+    if (percentage === 100) {
+      setTimeout(() => {
+        this.onAssetsLoaded();
+      }, 500);
+    }
+  }
+
+  private onAssetsLoaded(): void {
+    if (this.loaderElement) {
+      this.loaderElement.style.transition = 'opacity 0.5s ease';
+      this.loaderElement.style.opacity = '0'; 
+      setTimeout(() => {
+        this.loaderElement!.style.display = 'none'; 
+      }, 500); 
+    }
+  }
+
 
   private setSize() {
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.setPixelRatio(window.devicePixelRatio);
   }
 
-  private loadHDRI(): void {
-    const rgbeLoader = new RGBELoader();
-    rgbeLoader.load('images/table_mountain_4k.hdr', (texture) => {
-      this.envMap = this.pmremGenerator.fromEquirectangular(texture).texture;
-
-      this.scene.environment = this.envMap;
-      this.scene.background = this.envMap;
-
-      texture.dispose();
-      this.pmremGenerator.dispose();
-
-      this.updateEnvMapIntensity();
+  private loadHDRI(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const rgbeLoader = new RGBELoader();
+      rgbeLoader.load('images/table_mountain_4k.hdr', (texture) => {
+        this.envMap = this.pmremGenerator.fromEquirectangular(texture).texture;
+  
+        this.scene.environment = this.envMap;
+        this.scene.background = this.envMap;
+  
+        texture.dispose();
+        this.pmremGenerator.dispose();
+  
+        this.updateEnvMapIntensity();
+        resolve()
+      });
     });
   }
 
@@ -126,146 +186,53 @@ export class ThreeJSComponent {
     });
   }
 
+  private addFloor(): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      const loader = new GLTFLoader();
+      const floorPath = 'https://d7to0drpifvba.cloudfront.net/3d-models/f-f150v6/base2/Base.gltf';
 
-  private addGUI(): void {
-    const gui = new GUI();
-    const envControls = {
-      'Env Map Intensity': 1.0,
-      'Exposure': 1.0,
-      'Env Map Rotation': 0,
-      'Enable Env Map': true,
-      'Car Paint Color': '#ffffff',
-      'Tone Mapping': 'ACESFilmic',
-    };
+      loader.load(floorPath, (gltf) => {
+        const floor = gltf.scene;
+        floor.scale.set(1.5, 1.5, 1.5);
+        floor.position.set(0, -0.750, 0);
+        
+        floor.traverse((child) => {
+          if (child instanceof THREE.Mesh && child.material) {
+            const material = child.material as THREE.MeshPhysicalMaterial;
+            if (material.name === 'MT_BGBase_Main') {
+              material.color.set("#C4C4C4");
+              material.roughness = 0;
+              material.metalness = 0.8;
+              material.needsUpdate = true;
+              child.receiveShadow = true;
+            }
 
-    gui.add(envControls, 'Env Map Intensity', 0, 2, 0.01).onChange((value: number) => {
-      this.updateHDRILightingIntensity(value);
-    });
-
-    gui.add(envControls, 'Exposure', 0, 2, 0.01).onChange((value: number) => {
-      this.updateRendererExposure(value);
-    });
-
-    gui.add(envControls, 'Env Map Rotation', 0, Math.PI * 2, 0.01).onChange((value: number) => {
-      this.envMapRotation = value;
-      this.envMapGroup.rotation.set(0, value, 0);
-    });
-
-    gui.add(envControls, 'Enable Env Map').onChange((enabled: boolean) => {
-      this.scene.environment = enabled ? this.envMap : null;
-      this.scene.background = enabled ? this.envMap : null;
-    });
-
-    gui.addColor(envControls, 'Car Paint Color').onChange((color: string) => {
-      this.updateColor(color);
-    });
-
-    gui.add(envControls, 'Tone Mapping', [ 'Linear', 'ACESFilmic', 'Reinhard', 'Cineon' ]).onChange((value: string) => {
-      this.updateToneMapping(value);
-    });
-
-    gui.domElement.style.position = 'absolute';
-    gui.domElement.style.top = '500px';
-    gui.domElement.style.right = '10px';
-  }
-
-  private updateRendererExposure(exposure: number): void {
-    this.renderer.toneMappingExposure = exposure;
-    this.renderer.render(this.scene, this.camera);
-  }
-
-  private updateToneMapping(toneMapping: string): void {
-    switch (toneMapping) {
-      case 'Linear':
-        this.renderer.toneMapping = THREE.LinearToneMapping;
-        break;
-      case 'Reinhard':
-        this.renderer.toneMapping = THREE.ReinhardToneMapping;
-        break;
-      case 'Cineon':
-        this.renderer.toneMapping = THREE.CineonToneMapping;
-        break;
-      case 'ACESFilmic':
-        this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        break;
-      default:
-        this.renderer.toneMapping = THREE.LinearToneMapping;
-    }
-    this.renderer.render(this.scene, this.camera);
-  }
-
-
-
-  private updateHDRILightingIntensity(intensity: number): void {
-    if (this.envMap) {
-      this.scene.environment = this.envMap;
-      this.scene.background = this.envMap;
-
-      this.scene.traverse((child) => {
-        if (child instanceof THREE.Mesh) {
-          const material = child.material as THREE.MeshStandardMaterial;
-          if (material.envMap) {
-            material.envMapIntensity = intensity;
+            if (material.name === 'MT_BGBase_Emission') {
+              material.emissive.set(0x00ff00);
+              material.emissiveIntensity = 10;
+              material.needsUpdate = true;
+            }
           }
-        }
-      });
-    }
-  }
+        });
 
-  private addFloor(): void {
-    const loader = new GLTFLoader();
-    const floorPath = 'https://d7to0drpifvba.cloudfront.net/3d-models/f-f150v6/base2/Base.gltf';
-
-    loader.load(floorPath, (gltf) => {
-      const floor = gltf.scene;
-
-      floor.scale.set(1.5, 1.5, 1.5);
-      floor.position.set(0, -0.750, 0);
-      floor.rotation.set(0, 0, 0);
-
-      floor.traverse((child) => {
-        if (child instanceof THREE.Mesh && child.material) {
-          const material = child.material as THREE.MeshPhysicalMaterial;
-
-          if (material.name === 'MT_BGBase_Main') {
-            material.color.set("#C4C4C4");
-            material.roughness = 0;
-            material.metalness = 0.8;
-            material.reflectivity = 0.9;
-            material.needsUpdate = true;
-            child.receiveShadow = true;
-          }
-
-          if (material.name === 'MT_BGBase_Emission') {
-            material.emissive.set(0x00ff00);
-            material.emissiveIntensity = 10;
-            material.needsUpdate = true;
-          }
-        }
-      });
-
-      this.scene.add(floor);
-    }, undefined, (error) => {
-      console.error('An error occurred while loading the GLTF model:', error);
+        this.scene.add(floor);
+        resolve();
+      }, undefined, reject);
     });
   }
 
-
-
-
-  private loadCarModel() {
-    loadModel(this.scene, 'https://d7to0drpifvba.cloudfront.net/3d-models/f-f150v7/Ford_f150.gltf')
-      .then(({ model, animations }) => {
-        this.animationManager = new AnimationManager(model);
-        this.animationManager.loadAnimations(animations);
-        this.animationManager.setAnimationCompleteCallback(this.onAnimationComplete.bind(this));
-        this.playAllDoorsOpening();
-        this.playAllDoorsClosing(); 
-      })
-      .catch((error) => {
-        console.error('Error loading car model:', error);
-      });
+  private loadCarModel(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      loadModel(this.scene, 'https://d7to0drpifvba.cloudfront.net/3d-models/f-f150v9/Ford_f150.gltf')
+        .then(({ model, animations }) => {
+          this.animationManager = new AnimationManager(model);
+          this.animationManager.loadAnimations(animations);
+          this.playAllDoorsClosing();
+          resolve();
+        });
+    });
   }
+
 
   private animate() {
     requestAnimationFrame(this.animate.bind(this));
@@ -423,13 +390,19 @@ export class ThreeJSComponent {
 
   public toggleAlloyMeshesVisibility(visibleMeshName: string): void {
     const alloyMeshNames = ["SM-Aloy-Low_01", "SM_Alloy_002", "SM_Alloy_003", "SM_Alloy_004"];
-
+  
     this.animationManager?.model.traverse((child) => {
       if (child instanceof THREE.Mesh || child instanceof THREE.Group) {
+        // Check if the child name is in the alloy mesh names list
         if (alloyMeshNames.includes(child.name)) {
+          // Set visibility to true only for the specified visibleMeshName, others will be hidden
           child.visible = (child.name === visibleMeshName);
         }
       }
     });
   }
+
+
+  
+  
 }

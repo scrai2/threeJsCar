@@ -4,10 +4,10 @@
 <head>
   <meta name="viewport" content="width=device-width" />
   <link rel="stylesheet" href="./styles.css" />
-  <link rel="icon" type="image/x-icon" href="./src/assests/icons/icons.svg" />
-  <title>Ford f-150</title>
+  <link rel="icon" type="image/x-icon" href="./src/assets/icons/icons.svg" />
+  <title>Ford F-150</title>
 
-  <script src="./bundle.js"></script>
+  <script src="./bundle.js" defer></script>
   <style>
     body, html {
       margin: 0;
@@ -23,8 +23,8 @@
       display: block; /* Removes default inline spacing */
       position: absolute; /* Allows layering */
       z-index: 0; /* Places canvas below other elements */
-    }    
-    
+    }
+
   </style>
 </head>
 
@@ -32,6 +32,11 @@
   <canvas id="webgl"></canvas>
   <div id="main-container" class="main-container"></div>
   <div id="visualizer-container" class="visualizer-container"></div>
+
+  <!-- Loader Element -->
+  <div id="loader-container" class="vis_container">
+    <div class="vis_container-loader" data-progress="0" style="--progress: 0deg;"></div>
+  </div>
 </body>
 
 </html>

@@ -18,25 +18,25 @@ export const CATEGORIES: ICategory[] = [
     availableOptions: [
       {
         id: 2801,
-        name: "#060DC4",
-        isSelected: true,
+        name: "#00489e",
+        isSelected: false,
         thumbnailPath: `${Icons}#darkblueIcon`,
       },
       {
         id: 2802,
-        name: "#848484",
+        name: "#173531",
         isSelected: false,
-        thumbnailPath: `${Icons}#lightingBlueIcon`,
+        thumbnailPath: `${Icons}#green`,
       },
       {
         id: 2803,
-        name: "#000000",
+        name: "#0a0909",
         isSelected: false,
         thumbnailPath: `${Icons}#blackIcon`,
       },
       {
         id: 2804,
-        name: "#c61c1c",
+        name: "#7a0009",
         isSelected: false,
         thumbnailPath: `${Icons}#redIcon`,
       },

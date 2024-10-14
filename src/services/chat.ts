@@ -11,9 +11,9 @@ const getAction = async (reqObj: IGetActionRequest) => {
 const getQuestionAnswer = async (reqObj: IGetQuestionAnswerRequest) => {
   const { query, role } = reqObj;
 
-  const baseURL = process.env.BASE_URL;
+  // const baseURL = process.env.BASE_URL;
 
-  const data = await fetch(`${baseURL}/ask_question/`, {
+  const data = await fetch(`https://vyom-api.exsq.ai/ask_question/`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

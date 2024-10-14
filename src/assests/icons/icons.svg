@@ -114,8 +114,8 @@
     <symbol id="darkblueIcon" viewBox="0 0 32 32" fill="none">
         <circle cx="15.9099" cy="15.9006" r="15.9099" fill="#23438A" />
     </symbol>
-    <symbol id="lightingBlueIcon" viewBox="0 0 32 32" fill="none">
-        <circle cx="15.9099" cy="15.9006" r="15.9099" fill="#0C4286" />
+    <symbol id="green" viewBox="0 0 32 32" fill="none">
+        <circle cx="15.9099" cy="15.9006" r="15.9099" fill="#173531" />
     </symbol>
     <symbol id="blackIcon" viewBox="0 0 32 32" fill="none">
         <circle cx="15.9099" cy="15.9006" r="15.9099" fill="#000000" />
