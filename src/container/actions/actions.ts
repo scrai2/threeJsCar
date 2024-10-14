@@ -5,7 +5,7 @@ import { globals } from '../../model-viewer/globals';
 
 
 export const loadActions = (container: string) => {
-  loadLightOnOffAction(container);
+  // loadLightOnOffAction(container);
   loadExteriorInteriorAction(container);
   loadOpenCloseDoorAction(container);
   // loadRotateAction(container);
