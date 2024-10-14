@@ -3,13 +3,13 @@
     transform: translateX(0);
   }
   position: fixed;
-  background-color: $white-base;
-  width: 300px;
-  height: 100vh;
+  background-color: #333333;
+  width: 271px;
+  height: 20.1vh;
   top: 0;
   transform: translateX(-300px);
   transition: 0.5s;
-  opacity: 0.9;
+  opacity: 1;
   
   &-header {
     padding: 12px 25px;
@@ -22,7 +22,7 @@
     &-text {
       @include flex(flex, null, null, center, 10px);
       &-colortext {
-        @include font_size_color(20px, 500, $grey-500);
+        @include font_size_color(20px, 500, #ffffff);
       }
       &-colordrop {
         @include width_height(18px, 14px);
@@ -42,7 +42,7 @@
     @include flex(flex, null, null, null, 20px, column);
 
     &-body-header {
-      @include font_size_color(18px, 500, $grey-500);
+      @include font_size_color(18px, 500, #ffffff);
     }
     &-body-title {
       @include font_size_color(16px, 400, $grey-500);
