@@ -1,9 +1,9 @@
 replicaCount: 1
 
 image:
-  repository: registry.exkube.com/vyom-frontend
+  repository: garagedev.azurecr.io/vyom-frontend
   pullPolicy: IfNotPresent
-  tag: "e8cc76e"
+  tag: "0.0.5"
 
 imagePullSecrets: []
 nameOverride: "vyom-frontend"
@@ -11,15 +11,15 @@ fullnameOverride: ""
 
 ingress: 
   enabled: true
-  host: vyom-v2.kubepipe.in
+  host: vyom.exsq.ai
 
 service:
-  port: 3000
+  port: 3010
 
 resources: 
   requests:
-    memory: "64Mi"
-    cpu: "250m"
+    memory: "2Gi"
+    cpu: 2
 
 autoscaling:
   enabled: true
@@ -28,11 +28,11 @@ autoscaling:
   targetCPUUtilizationPercentage: 80
 
 serviceAccount:
-  name: dafault
+  name: vyom-workload-identity-sa
 
 securityContext:
   allowPrivilegeEscalation: false
-  runAsNonRoot: false
+  runAsNonRoot: true
 
 nodeSelector: {}
 
@@ -41,5 +41,5 @@ tolerations: {}
 affinity: {}
 
 config:
-  BASE_URL: https://vyom-api.exsq.ai
+  BASE_URL: https://vyom-api.exkube.com
   CDN_ASSETS_BASE_URL: https://d7to0drpifvba.cloudfront.net/static
