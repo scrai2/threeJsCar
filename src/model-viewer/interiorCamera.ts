@@ -9,7 +9,7 @@ export class InteriorCamera {
   public target: THREE.Vector3;
   private isDragging: boolean = false;
   private prevMousePosition: { x: number, y: number } = { x: 0, y: 0 };
-  private gui: dat.GUI;
+  // private gui: dat.GUI;
   private rotationSpeed: number = 0.0025; // Reduced rotation speed for smoother movement
   private dampingFactor: number = 0.1;
   private currentTarget: THREE.Vector3;
@@ -31,7 +31,7 @@ export class InteriorCamera {
 
     this.updateCamera();
 
-    this.gui = new dat.GUI();
+    // this.gui = new dat.GUI();
     // this.addGUIControls();
 
     this.canvas.addEventListener('mousedown', this.onMouseDown.bind(this));
