@@ -114,9 +114,7 @@ export const renderCategoryOptions = (
                 }" class="swatch-category-options-list-item-colorlist">
                     <use xlink:href="${availableOption.thumbnailPath}"></use>
                 </svg>
-                <svg class="check ${availableOption.isSelected ? "show" : ""}">
-                <use xlink:href="${Icons}#checkIcon"></use>
-                </svg>  
+                
               </li> 
               
         `

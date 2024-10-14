@@ -37,6 +37,7 @@ export class ThreeJSComponent {
   public interiorCamera: InteriorCamera | null = null;
   public currentCamera: 'exterior' | 'interior' = 'exterior';
   public isDoorOpen: boolean = false;
+  public isSunroff:boolean = false;
   public isInterior: boolean = false;
 
   public exteriorCameraPosition = new THREE.Vector3(0, 2, 15);
@@ -309,6 +310,13 @@ export class ThreeJSComponent {
     }
   }
 
+  public playSunRoofOpening() {
+    if (this.animationManager) {
+      this.animationManager.playAnimation('Sunroof_anim');
+      // this.isSunroff = true;
+    }
+  }
+
   public setCameraPosition(position: THREE.Vector3, target: THREE.Vector3) {
     if (this.currentCamera === 'interior' && this.interiorCamera) {
       this.interiorCamera.setCameraPosition(position, target);
@@ -402,7 +410,4 @@ export class ThreeJSComponent {
     });
   }
 
-
-  
-  
 }

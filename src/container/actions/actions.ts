@@ -5,7 +5,7 @@ import { globals } from '../../model-viewer/globals';
 
 
 export const loadActions = (container: string) => {
-  // loadLightOnOffAction(container);
+  loadLightOnOffAction(container);
   loadExteriorInteriorAction(container);
   loadOpenCloseDoorAction(container);
   // loadRotateAction(container);
@@ -129,7 +129,20 @@ export const loadLightOnOffAction = (container: string) => {
     const lightButton = $query(".light-container-lightOn");
     if (lightButton) {
       lightButton.addEventListener("click", () => {
-        console.log("Light On/Off button clicked!");
+        if (globals.threeJSComponent) {
+          // if (globals.threeJSComponent.isSunroff) {
+            console.log("globalflase",globals.threeJSComponent )
+            globals.threeJSComponent.playSunRoofOpening();
+          // }
+          //  else {
+
+          //   // globals.threeJSComponent.closeSunroof();
+          //   console.log("globaltrue",globals.threeJSComponent.isSunroff )
+          // }
+          // globals.threeJSComponent.isSunroff = !globals.threeJSComponent.isSunroff;
+        } else {
+          console.error("ThreeJSComponent instance is not initialized.");
+        }
       });
     }
   }
