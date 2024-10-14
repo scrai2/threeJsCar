@@ -25,9 +25,9 @@ export const loadOpenCloseDoorAction = (container: string) => {
 
       if (globals.threeJSComponent) {
         if (globals.threeJSComponent.isDoorOpen) {
-          globals.threeJSComponent.playAllDoorsOpening();
+          globals.threeJSComponent?.playAllDoorsClosing();
         } else {
-          globals.threeJSComponent.playAllDoorsClosing();
+          globals.threeJSComponent?.playAllDoorsOpening();
         }
         globals.threeJSComponent.isDoorOpen = !globals.threeJSComponent.isDoorOpen;
       } else {

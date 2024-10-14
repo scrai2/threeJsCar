@@ -121,6 +121,24 @@ export class ThreeJSComponent {
     });
   }
 
+  public playAllDoorsOpening() {
+    if (this.animationManager) {
+        this.animationManager.setAnimationCompleteCallback(() => {
+            this.isDoorOpen = true; // Set the door state when the animation completes
+        });
+        this.animationManager.playAnimation('All_Doors_Opening');
+    }
+}
+
+
+public playAllDoorsClosing() {
+  if (this.animationManager) {
+      this.animationManager.setAnimationCompleteCallback(() => {
+          this.isDoorOpen = false; // Set the door state when the animation completes
+      });
+      this.animationManager.playAnimation('All_doors_closing');
+  }
+}
 
   private updateLoaderProgress(percentage: number): void {
     this.currentProgress = percentage;
@@ -229,6 +247,7 @@ export class ThreeJSComponent {
           this.animationManager = new AnimationManager(model);
           this.animationManager.loadAnimations(animations);
           this.playAllDoorsClosing();
+          this.isDoorOpen= false;
           resolve();
         });
     });
@@ -296,20 +315,6 @@ export class ThreeJSComponent {
     this.isAnimationPlaying = false;
   }
 
-  public playAllDoorsOpening() {
-    if (this.animationManager) {
-      this.animationManager.playAnimation('All_Doors_Opening');
-      this.isDoorOpen = true;
-    }
-  }
-
-  public playAllDoorsClosing() {
-    if (this.animationManager) {
-      this.animationManager.playAnimation('All_doors_closing');
-      this.isDoorOpen = false;
-    }
-  }
-
   public playSunRoofOpening() {
     if (this.animationManager) {
       this.animationManager.playAnimation('Sunroof_anim');
@@ -351,6 +356,10 @@ export class ThreeJSComponent {
 
   public updateColor(colorCode: string) {
     this.changeCarPaintColor(colorCode);
+  }
+
+  public setDoorStatus(status: boolean) {
+    this.isDoorOpen = status;
   }
 
   public changeCarPaintColor(colorCode: string) {
@@ -411,3 +420,18 @@ export class ThreeJSComponent {
   }
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
