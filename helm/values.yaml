@@ -41,5 +41,5 @@ tolerations: {}
 affinity: {}
 
 config:
-  BASE_URL: https://vyom-api.exsq.ai
+  BASE_URL: https://vyom-ml.kubepipe.in 
   CDN_ASSETS_BASE_URL: https://d7to0drpifvba.cloudfront.net/static
