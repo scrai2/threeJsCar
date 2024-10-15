@@ -169,14 +169,24 @@ export const attachVoiceInputEvent = () => {
   }
 };
 
+export let controlsEnabled = true
 
 export const attachChatSubmitEvent = () => {
-  const chatInputField = $query(`.chat-input`);
+  const chatInputField = $query(`.chat-input`) as HTMLInputElement;
   const chatSubmitButton = $query(`.chat-submit`);
+
+  // Add event listeners for focus and blur
+  chatInputField.addEventListener("focus", () => {
+    controlsEnabled = false; // Disable movement controls when focused
+  });
+
+  chatInputField.addEventListener("blur", () => {
+    controlsEnabled = true; // Re-enable movement controls when not focused
+  });
 
   if (chatInputField && chatSubmitButton) {
     chatInputField.addEventListener("input", () => {
-      if ((chatInputField as HTMLInputElement).value.trim() !== "") {
+      if (chatInputField.value.trim() !== "") {
         chatSubmitButton.classList.remove("disable");
       } else {
         chatSubmitButton.classList.add("disable");
@@ -186,23 +196,18 @@ export const attachChatSubmitEvent = () => {
     chatInputField.addEventListener("keydown", async (event) => {
       if (
         (event as KeyboardEvent).key === "Enter" &&
-        (chatInputField as HTMLInputElement).value.trim() !== ""
+        chatInputField.value.trim() !== ""
       ) {
-        await chatSubmitHandler(
-          chatInputField as HTMLInputElement,
-          chatSubmitButton
-        );
+        await chatSubmitHandler(chatInputField, chatSubmitButton);
       }
     });
 
     chatSubmitButton.addEventListener("click", async () => {
-      await chatSubmitHandler(
-        chatInputField as HTMLInputElement,
-        chatSubmitButton
-      );
+      await chatSubmitHandler(chatInputField, chatSubmitButton);
     });
   }
 };
+
 
 export const chatSubmitHandler = async (
   chatInputElement: HTMLInputElement,
