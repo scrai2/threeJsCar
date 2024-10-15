@@ -6,6 +6,7 @@ import { createLights } from './light';
 import { InteriorCamera } from './interiorCamera';
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import { controlsEnabled } from '../container/chat/chat';
 
 export class ThreeJSComponent {
   private scene: THREE.Scene;
@@ -98,6 +99,8 @@ export class ThreeJSComponent {
     this.animate();
     this.loadAssets();
   }
+
+
 
   private loadAssets(): Promise<void> {
     return new Promise((resolve, reject) => {
@@ -297,6 +300,7 @@ public playAllDoorsClosing() {
   }
 
   private onKeyDown(event: KeyboardEvent) {
+    if (!controlsEnabled) return;
     this.keysPressed[event.key.toLowerCase()] = true;
   }
 
