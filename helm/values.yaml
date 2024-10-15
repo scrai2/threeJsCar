@@ -3,7 +3,7 @@ replicaCount: 1
 image:
   repository: registry.exkube.com/vyom-frontend-v2
   pullPolicy: IfNotPresent
-  tag: "a30e7d4"
+  tag: "4260c19"
 
 imagePullSecrets: []
 nameOverride: "vyom-frontend-test"

@@ -1,8 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  creationTimestamp: null
-  name: {{ include "vyom-frontend-test.fullname" . }}-config
+  name: {{ .Values.nameOverride | default .Chart.Name }}-config
 data:
   {{- range $key, $value := .Values.config }}
   {{ $key }}: {{ $value | quote }}
