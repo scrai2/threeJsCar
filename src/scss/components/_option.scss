@@ -76,3 +76,28 @@
     }
   }
 }
+
+
+
+.interior-color-btn {
+  position: absolute;
+  right: 10px;
+  padding: 10px 20px;
+  background-color: #333;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  bottom: 26px;
+  height: 55px;
+  width: 75px;
+  left: 420px;
+}
+
+
+
+.gui-container {
+  position: absolute;
+  top: 50px; /* Adjust the position if needed */
+  right: 10px;
+}
