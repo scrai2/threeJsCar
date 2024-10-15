@@ -2,14 +2,14 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ include "vyom-frontend-v2.fullname" . }}
+  name: {{ include "vyom-frontend-test.fullname" . }}
   labels:
-    {{- include "vyom-frontend-v2.labels" . | nindent 4 }}
+    {{- include "vyom-frontend-test.labels" . | nindent 4 }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: {{ include "vyom-frontend-v2.fullname" . }}
+    name: {{ include "vyom-frontend-test.fullname" . }}
   minReplicas: {{ .Values.autoscaling.minReplicas }}
   maxReplicas: {{ .Values.autoscaling.maxReplicas }}
   metrics:

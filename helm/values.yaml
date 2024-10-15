@@ -6,7 +6,7 @@ image:
   tag: "e8cc76e"
 
 imagePullSecrets: []
-nameOverride: "vyom-frontend-v2"
+nameOverride: "vyom-frontend-test"
 fullnameOverride: ""
 
 ingress: 
