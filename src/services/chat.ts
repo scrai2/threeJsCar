@@ -13,7 +13,7 @@ const getQuestionAnswer = async (reqObj: IGetQuestionAnswerRequest) => {
 
   // const baseURL = process.env.BASE_URL;
 
-  const data = await fetch(`https://vyom-api.exsq.ai/ask_question/`, {
+  const data = await fetch(`https://vyom-api.kubepipe.in/ask_question/`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
