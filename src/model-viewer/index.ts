@@ -106,122 +106,6 @@ export class ThreeJSComponent {
     this.loadAssets();
   }
 
-  private setupGUI() {
-    this.gui = new dat.GUI({ autoPlace: false }); // Disable automatic placement
-    
-    // Create the interior folder but keep it closed and hidden initially
-    const interiorFolder = this.gui.addFolder(''); // Empty title to hide the folder name
-    interiorFolder.close(); // Close it initially to hide the controls
-    
-    // Color settings as boolean checkboxes
-    type ColorName = 'White' | 'Red' | 'Brown'; 
-    const colorSettings: Record<ColorName, boolean> = {
-      'White': true, // Default color selected
-      'Red': false,
-      'Brown': false,
-    };
-  
-    // Add checkboxes to the folder
-    Object.keys(colorSettings).forEach((colorName) => {
-      const checkbox = interiorFolder.add(colorSettings, colorName as ColorName).name(colorName).listen();
-    
-      checkbox.onChange((value: boolean) => {
-        const colorToApply: string = value ? 
-          (colorName === 'Red' ? '#7a0009' : (colorName === 'Brown' ? '#D2B48C' : '#FFFFFF')) 
-          : '#FFFFFF';
-        
-        // Change the materials color
-        this.changeMaterialsColor(colorToApply, [
-          'BackDoorMat-1004',
-          'FrontDoorMat-1003',
-          'FrontSeatBase-1003', 
-          'FrontSeatBack-1002', 
-          'FrontSeatHead-1001', 
-          'DashBordMate-1010', 
-          'BackSeatMat-1001', 
-          'BackSeatMat-1002', 
-          'BackSeatMat-1003', 
-          'BackSeatMat-1004', 
-          'BackSeatMat-1005', 
-          'BackSeatMat-1006', 
-          'BackSeatMat-1007', 
-          'BackSeatMat-1008'
-        ]);
-  
-        if (value) {
-          Object.keys(colorSettings).forEach((otherColor) => {
-            if (otherColor !== colorName) {
-              colorSettings[otherColor as ColorName] = false;
-            }
-          });
-        }
-      });
-    });
-  
-    const guiContainer = this.gui.domElement;
-    guiContainer.classList.add('gui-container');
-    document.body.appendChild(guiContainer);
-  
-    const button = document.createElement('button');
-    button.innerText = 'Interior Color';
-    button.classList.add('interior-color-btn');
-    document.body.appendChild(button);
-  
-    let isFolderVisible = false;
-    button.addEventListener('click', () => {
-      const buttonRect = button.getBoundingClientRect();
-      guiContainer.style.position = 'absolute';
-      guiContainer.style.top = `${buttonRect.top - guiContainer.offsetHeight - 10}px`; // Place the GUI just above the button
-      guiContainer.style.left = `${520}px`; // Align it horizontally with the button
-  
-      if (isFolderVisible) {
-        interiorFolder.close(); // Hide the folder (color checkboxes)
-        guiContainer.style.display = 'none'; // Hide the container
-      } else {
-        interiorFolder.open(); // Show the folder (color checkboxes)
-        guiContainer.style.display = 'block'; // Show the container
-      }
-      isFolderVisible = !isFolderVisible; // Toggle the state
-    });
-  
-    // Hide the folder title and close button
-    const folderElement = interiorFolder.domElement.querySelector('.title') as HTMLElement; // Cast to HTMLElement
-    if (folderElement) {
-      folderElement.style.display = 'none'; // Hide the title and arrow
-    }
-  
-    const closeButton = this.gui.domElement.querySelector('.close-button') as HTMLElement; // Cast to HTMLElement
-    if (closeButton) {
-      closeButton.style.display = 'none'; // Hide the close control
-    }
-  }
-  
-  
-  
-  
-  
-  
-
-  public changeMaterialsColor(colorCode: string, materialNames: string[]) {
-    if (!this.animationManager) {
-      console.error('AnimationManager is not initialized.');
-      return;
-    }
-
-    this.animationManager.model.traverse((child) => {
-      if (child instanceof THREE.Mesh) {
-        const materials = Array.isArray(child.material) ? child.material : [child.material];
-        materials.forEach((material: THREE.Material) => {
-          if (materialNames.includes(material.name)) {
-            (material as THREE.MeshPhysicalMaterial).color.set(colorCode);
-          }
-        });
-      }
-    });
-  }
-
-
-
   private loadAssets(): Promise<void> {
     return new Promise((resolve, reject) => {
       this.loadHDRI()
@@ -442,7 +326,14 @@ public playAllDoorsClosing() {
   public playSunRoofOpening() {
     if (this.animationManager) {
       this.animationManager.playAnimation('Sunroof_anim');
-      // this.isSunroff = true;
+      this.isSunroff = true;
+    }
+  }
+
+  public playSunRoofClosing() {
+    if (this.animationManager) {
+      this.animationManager.playAnimationReverse('Sunroof_anim');
+      this.isSunroff = false;
     }
   }
 
@@ -542,5 +433,111 @@ public playAllDoorsClosing() {
       }
     });
   }
+
+  private setupGUI() {
+    this.gui = new dat.GUI({ autoPlace: false }); // Disable automatic placement
+    
+    const interiorFolder = this.gui.addFolder(''); // Empty title to hide the folder name
+    interiorFolder.close(); // Close it initially to hide the controls
+    
+    type ColorName = 'White' | 'Red' | 'Brown'; 
+    const colorSettings: Record<ColorName, boolean> = {
+      'White': true, // Default color selected
+      'Red': false,
+      'Brown': false,
+    };
+  
+    Object.keys(colorSettings).forEach((colorName) => {
+      const checkbox = interiorFolder.add(colorSettings, colorName as ColorName).name(colorName).listen();
+    
+      checkbox.onChange((value: boolean) => {
+        const colorToApply: string = value ? 
+          (colorName === 'Red' ? '#7a0009' : (colorName === 'Brown' ? '#D2B48C' : '#FFFFFF')) 
+          : '#FFFFFF';
+        
+        this.changeMaterialsColor(colorToApply, [
+          'BackDoorMat-1004',
+          'FrontDoorMat-1003',
+          'FrontSeatBase-1003', 
+          'FrontSeatBack-1002', 
+          'FrontSeatHead-1001', 
+          'DashBordMate-1010', 
+          'BackSeatMat-1001', 
+          'BackSeatMat-1002', 
+          'BackSeatMat-1003', 
+          'BackSeatMat-1004', 
+          'BackSeatMat-1005', 
+          'BackSeatMat-1006', 
+          'BackSeatMat-1007', 
+          'BackSeatMat-1008'
+        ]);
+  
+        if (value) {
+          Object.keys(colorSettings).forEach((otherColor) => {
+            if (otherColor !== colorName) {
+              colorSettings[otherColor as ColorName] = false;
+            }
+          });
+        }
+      });
+    });
+  
+    const guiContainer = this.gui.domElement;
+    guiContainer.classList.add('gui-container');
+    document.body.appendChild(guiContainer);
+  
+    const button = document.createElement('button');
+    button.innerText = 'Interior Color';
+    button.classList.add('interior-color-btn');
+    document.body.appendChild(button);
+  
+    let isFolderVisible = false;
+    button.addEventListener('click', () => {
+      const buttonRect = button.getBoundingClientRect();
+      guiContainer.style.position = 'absolute';
+      guiContainer.style.top = `${buttonRect.top - guiContainer.offsetHeight - 10}px`; // Place the GUI just above the button
+      guiContainer.style.left = `${520}px`; // Align it horizontally with the button
+  
+      if (isFolderVisible) {
+        interiorFolder.close(); // Hide the folder (color checkboxes)
+        guiContainer.style.display = 'none'; // Hide the container
+      } else {
+        interiorFolder.open(); // Show the folder (color checkboxes)
+        guiContainer.style.display = 'block'; // Show the container
+      }
+      isFolderVisible = !isFolderVisible; // Toggle the state
+    });
+  
+    const folderElement = interiorFolder.domElement.querySelector('.title') as HTMLElement; // Cast to HTMLElement
+    if (folderElement) {
+      folderElement.style.display = 'none'; 
+    }
+  
+    const closeButton = this.gui.domElement.querySelector('.close-button') as HTMLElement; // Cast to HTMLElement
+    if (closeButton) {
+      closeButton.style.display = 'none'; // Hide the close control
+    }
+  }
+
+  
+  public changeMaterialsColor(colorCode: string, materialNames: string[]) {
+    if (!this.animationManager) {
+      console.error('AnimationManager is not initialized.');
+      return;
+    }
+
+    this.animationManager.model.traverse((child) => {
+      if (child instanceof THREE.Mesh) {
+        const materials = Array.isArray(child.material) ? child.material : [child.material];
+        materials.forEach((material: THREE.Material) => {
+          if (materialNames.includes(material.name)) {
+            (material as THREE.MeshPhysicalMaterial).color.set(colorCode);
+          }
+        });
+      }
+    });
+  }
+
+
 
 }

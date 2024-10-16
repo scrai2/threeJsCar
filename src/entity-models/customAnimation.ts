@@ -59,4 +59,30 @@ export class AnimationManager {
   public setAnimationCompleteCallback(callback: () => void) {
     this.onAnimationComplete = callback;
   }
+
+  public playAnimationReverse(animationName: string, timeScale: number = -0.5) {
+    if (!this.mixer) {
+      console.error("Animation mixer is not initialized.");
+      return;
+    }
+
+    const clip = this.animations.find((anim) => anim.name === animationName);
+    if (clip) {
+      const action = this.mixer.clipAction(clip);
+      if (this.currentAction) {
+        this.currentAction.stop();
+      }
+      this.currentAction = action;
+      
+      // Start from the end of the animation
+      action.time = clip.duration;
+      action.reset();
+      action.setLoop(THREE.LoopOnce, 1);
+      action.clampWhenFinished = true;
+      action.setEffectiveTimeScale(timeScale); // Negative timeScale to play in reverse
+      action.play();
+    } else {
+      console.warn(`Animation ${animationName} not found.`);
+    }
+  }
 }

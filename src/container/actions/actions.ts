@@ -130,16 +130,16 @@ export const loadLightOnOffAction = (container: string) => {
     if (lightButton) {
       lightButton.addEventListener("click", () => {
         if (globals.threeJSComponent) {
-          // if (globals.threeJSComponent.isSunroff) {
+          if (globals.threeJSComponent.isSunroff) {
             console.log("globalflase",globals.threeJSComponent )
             globals.threeJSComponent.playSunRoofOpening();
-          // }
-          //  else {
+          }
+           else {
 
-          //   // globals.threeJSComponent.closeSunroof();
-          //   console.log("globaltrue",globals.threeJSComponent.isSunroff )
-          // }
-          // globals.threeJSComponent.isSunroff = !globals.threeJSComponent.isSunroff;
+            globals.threeJSComponent.playSunRoofClosing();
+            console.log("globaltrue",globals.threeJSComponent.isSunroff )
+          }
+          globals.threeJSComponent.isSunroff = !globals.threeJSComponent.isSunroff;
         } else {
           console.error("ThreeJSComponent instance is not initialized.");
         }
