@@ -1,45 +1,33 @@
 replicaCount: 1
-
 image:
   repository: registry.exkube.com/vyom-frontend-v2
   pullPolicy: IfNotPresent
-  tag: "4260c19"
-
+  tag: "5"
 imagePullSecrets: []
 nameOverride: "vyom-frontend-v2"
 fullnameOverride: ""
-
-ingress: 
+ingress:
   enabled: true
   host: vyom-v2.kubepipe.in
-
 service:
   port: 3000
-
-resources: 
+resources:
   requests:
     memory: "64Mi"
     cpu: "250m"
-
 autoscaling:
   enabled: true
   minReplicas: 1
   maxReplicas: 1
   targetCPUUtilizationPercentage: 80
-
 serviceAccount:
   name: dafault
-
 securityContext:
   allowPrivilegeEscalation: false
   runAsNonRoot: false
-
 nodeSelector: {}
-
 tolerations: {}
-
 affinity: {}
-
 config:
-  BASE_URL: https://vyom-ml.kubepipe.in 
+  BASE_URL: https://vyom-ml.kubepipe.in
   CDN_ASSETS_BASE_URL: https://d7to0drpifvba.cloudfront.net/static
