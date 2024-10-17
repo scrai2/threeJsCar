@@ -2,7 +2,7 @@ replicaCount: 1
 image:
   repository: registry.exkube.com/vyom-test-argo
   pullPolicy: IfNotPresent
-  tag: "17"
+  tag: "19"
 imagePullSecrets: []
 nameOverride: "vyom-test-argo"
 fullnameOverride: ""
