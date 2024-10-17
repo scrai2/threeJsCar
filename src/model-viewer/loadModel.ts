@@ -42,6 +42,7 @@ export function loadModel(
         });
         updateCarMaterial(model);
         toggleAlloyMeshesVisibility(model);
+        addHeadlightSpotlight(scene);
         resolve({ model, animations: gltf.animations });
       },
       undefined,
@@ -51,6 +52,27 @@ export function loadModel(
     );
   });
 }
+
+function addHeadlightSpotlight(
+  scene: THREE.Scene,
+  
+): THREE.SpotLight | null {
+
+  // Create and set up the spotlight
+  const spotlight = new THREE.SpotLight("#00489e", 6);
+  spotlight.position.set(-0.601,0.303, 2.429 );
+  spotlight.rotation.set(0, 0.9, 0)
+  spotlight.castShadow = true;
+  spotlight.shadow.mapSize.width = 512;
+  spotlight.shadow.mapSize.height = 512;
+
+  // Add the spotlight and its helper to the scene
+  scene.add(spotlight);
+
+  return spotlight;
+}
+
+
 
 function centerAndScale(
   model: THREE.Group,
