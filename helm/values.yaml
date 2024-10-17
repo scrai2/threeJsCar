@@ -1,10 +1,10 @@
 replicaCount: 1
 image:
-  repository: registry.exkube.com/vyom-frontend-v2
+  repository: registry.exkube.com/vyom-test-argo
   pullPolicy: IfNotPresent
   tag: "8"
 imagePullSecrets: []
-nameOverride: "vyom-frontend-v2"
+nameOverride: "vyom-test-argo"
 fullnameOverride: ""
 ingress:
   enabled: true
