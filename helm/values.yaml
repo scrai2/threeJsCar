@@ -2,7 +2,7 @@ replicaCount: 1
 image:
   repository: registry.exkube.com/vyom-frontend-v2
   pullPolicy: IfNotPresent
-  tag: "7"
+  tag: "8"
 imagePullSecrets: []
 nameOverride: "vyom-frontend-v2"
 fullnameOverride: ""
