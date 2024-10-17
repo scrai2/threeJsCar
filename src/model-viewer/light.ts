@@ -5,7 +5,7 @@ function createLights(scene: THREE.Scene): { directionalLight: THREE.Directional
 
   const directionalLight = new THREE.DirectionalLight(0xffffff, 3.5);
   directionalLight.position.set(0.1, 11.2, 29); // Position the light above the scene
-  directionalLight.castShadow = true; // Enable shadows
+  directionalLight.castShadow = false; // Enable shadows
   directionalLight.shadow.mapSize.width = 2048; // Set shadow quality
   directionalLight.shadow.mapSize.height = 2048;
   directionalLight.shadow.camera.near = 0.5;
@@ -15,7 +15,6 @@ function createLights(scene: THREE.Scene): { directionalLight: THREE.Directional
 
   const ambientLight = new THREE.AmbientLight(0xffffff, 1);
   ambientLight.position.set(10, 10, 10); // Position the light above the scene
-
   scene.add(ambientLight);
 
   // const gui = new dat.GUI({ autoPlace: false }); // autoPlace false to manually position GUI
