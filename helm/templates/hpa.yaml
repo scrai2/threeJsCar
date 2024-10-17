@@ -4,7 +4,7 @@ kind: HorizontalPodAutoscaler
 metadata:
   name: {{ .Values.nameOverride | default .Chart.Name }}
   labels:
-    {{- include "vyom-frontend-v2.labels" . | nindent 4 }}
+    {{- include "vyom-test-argo.labels" . | nindent 4 }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
